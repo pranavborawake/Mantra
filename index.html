@@ -3,99 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mantra Counter</title>
+    <title>Mantra Counter Pro</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f2f5; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        #counter { font-size: 80px; margin: 20px 0; color: #2ecc71; font-weight: bold; }
-        #start-btn { width: 100%; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 10px; border: none; color: white; background: #3498db; transition: 0.3s; }
-        #start-btn.active { background: #e74c3c; }
-        .log { margin-top: 20px; font-size: 14px; color: #7f8c8d; background: #eee; padding: 10px; border-radius: 5px; min-height: 40px; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #121212; color: white; }
+        .card { background: #1e1e1e; padding: 25px; border-radius: 20px; max-width: 400px; margin: auto; border: 1px solid #333; }
+        input, select { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; background: #333; color: white; font-size: 18px; box-sizing: border-box; }
+        #counter { font-size: 100px; margin: 20px 0; color: #00ff88; font-weight: bold; }
+        button { width: 100%; padding: 20px; font-size: 20px; font-weight: bold; border-radius: 15px; border: none; color: white; cursor: pointer; }
+        .start-btn { background: #007bff; }
+        .stop-btn { background: #ff4444; }
+        .log { margin-top: 20px; font-size: 14px; color: #888; background: #222; padding: 10px; border-radius: 8px; min-height: 20px; }
+        label { display: block; text-align: left; margin-top: 10px; font-size: 14px; color: #aaa; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Mantra Counter</h2>
+    <h2 style="margin:0 0 10px 0;">Mantra Counter</h2>
     
     <label>Mantra Word:</label>
     <input type="text" id="mantra-input" value="om" placeholder="e.g. om">
 
-    <label>Goal:</label>
+    <label>Target Count:</label>
     <select id="target-select">
         <option value="11">11 Times</option>
         <option value="33">33 Times</option>
         <option value="108" selected>108 Times</option>
     </select>
 
+    <label>Completion Sound:</label>
+    <select id="sound-select">
+        <option value="beep">Electronic Beep</option>
+        <option value="ding">Zen Bell (Ding)</option>
+        <option value="none">No Sound</option>
+    </select>
+
     <div id="counter">0</div>
 
-    <button id="start-btn">TAP TO START</button>
-
-    <div class="log" id="log-box">Status: Ready</div>
+    <button id="action-btn" class="start-btn">START CHANTING</button>
+    <div class="log" id="log-box">Ready...</div>
 </div>
 
 <script>
     let count = 0;
     let isRunning = false;
     let recognition;
+    let audioCtx;
 
-    const startBtn = document.getElementById('start-btn');
+    const actionBtn = document.getElementById('action-btn');
     const counterDisplay = document.getElementById('counter');
     const logBox = document.getElementById('log-box');
-    const mantraInput = document.getElementById('mantra-input');
-    const targetSelect = document.getElementById('target-select');
 
-    // 1. Initialize Speech Engine
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-        alert("Your browser does not support voice recognition. Please use Chrome on Android or Safari on iPhone.");
-    } else {
+    if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = false;
-        recognition.lang = 'en-US'; // Change to 'hi-IN' for Hindi if needed
+        // recognition.lang = 'sa-IN'; // Uncomment this line for better Sanskrit/Hindi recognition
 
         recognition.onresult = (event) => {
             const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-            const targetWord = mantraInput.value.trim().toLowerCase();
+            const targetWord = document.getElementById('mantra-input').value.trim().toLowerCase();
+            const targetTotal = parseInt(document.getElementById('target-select').value);
             
             logBox.innerText = "Heard: " + transcript;
 
-            if (transcript.includes(targetWord)) {
-                count++;
+            // FIX: This counts HOW MANY TIMES the word appears in the current sentence
+            const words = transcript.split(/\s+/);
+            const matches = words.filter(word => word.includes(targetWord)).length;
+
+            if (matches > 0) {
+                count += matches;
                 counterDisplay.innerText = count;
 
-                if (count >= parseInt(targetSelect.value)) {
-                    playBeep();
+                if (count >= targetTotal) {
+                    playCompletionSound();
                     stopApp();
-                    logBox.innerText = "Finished " + targetSelect.value + " chants!";
                 }
             }
         };
 
-        recognition.onerror = (event) => {
-            logBox.innerText = "Error: " + event.error;
-            if (event.error === 'not-allowed') {
-                alert("Permission denied. Please check your browser's microphone settings.");
-            }
-        };
-
-        recognition.onend = () => {
-            if (isRunning) recognition.start(); // Auto-restart if browser stops listening
-        };
+        recognition.onerror = (e) => { logBox.innerText = "Error: " + e.error; };
+        recognition.onend = () => { if (isRunning) recognition.start(); };
     }
 
-    // 2. Start/Stop Logic
     async function startApp() {
-        // Essential: Initialize Audio Context on first click for iOS/Android
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const tempCtx = new AudioContext();
-
         try {
-            // Force browser to prompt for microphone
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             await navigator.mediaDevices.getUserMedia({ audio: true });
             
             count = 0;
@@ -103,38 +98,49 @@
             isRunning = true;
             recognition.start();
             
-            startBtn.innerText = "STOP CHANTING";
-            startBtn.classList.add('active');
+            actionBtn.innerText = "STOP CHANTING";
+            actionBtn.className = "stop-btn";
             logBox.innerText = "Listening...";
         } catch (err) {
-            alert("Microphone access is required. Please allow it when prompted.");
-            logBox.innerText = "Status: Permission Denied";
+            alert("Microphone access denied. Ensure you are using HTTPS.");
         }
     }
 
     function stopApp() {
         isRunning = false;
         recognition.stop();
-        startBtn.innerText = "TAP TO START";
-        startBtn.classList.remove('active');
+        actionBtn.innerText = "START CHANTING";
+        actionBtn.className = "start-btn";
     }
 
-    startBtn.onclick = () => {
+    actionBtn.onclick = () => {
         if (!isRunning) startApp();
         else stopApp();
     };
 
-    function playBeep() {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+    function playCompletionSound() {
+        const soundType = document.getElementById('sound-select').value;
+        if (soundType === 'none') return;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
         osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.value = 880;
-        osc.start();
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1);
-        osc.stop(ctx.currentTime + 1);
+        gain.connect(audioCtx.destination);
+
+        if (soundType === 'beep') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        } else if (soundType === 'ding') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 2);
+        }
     }
 </script>
 </body>
