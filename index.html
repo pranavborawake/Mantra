@@ -1,187 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mantra Pro - Fixed</title>
-    <style>
-        body { font-family: sans-serif; background: #0a0a0a; color: #fff; text-align: center; margin: 0; padding: 20px; }
-        .card { background: #161616; padding: 20px; border-radius: 20px; border: 1px solid #333; max-width: 450px; margin: auto; }
-        select, button { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 10px; font-size: 16px; outline: none; }
-        select { background: #222; color: white; border: 1px solid #555; }
-        button { font-weight: bold; cursor: pointer; border: none; }
-        #start-btn { background: #007bff; color: white; }
-        #counter { font-size: 100px; font-weight: bold; color: #00ff88; margin: 20px 0; line-height: 1; }
-        #status-box { background: #000; padding: 15px; color: #aaa; border-radius: 8px; font-size: 14px; min-height: 20px; border: 1px solid #333; margin-top: 10px; }
-        .label { text-align: left; font-size: 11px; color: #555; margin-bottom: 5px; text-transform: uppercase; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mantra Pro - Meditation Mode</title>
+
+<style>
+body {
+    font-family: sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+.card {
+    background: #161616;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid #333;
+    max-width: 450px;
+    margin: auto;
+}
+
+select, button {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+select {
+    background: #222;
+    color: white;
+    border: 1px solid #555;
+}
+
+button {
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
+#start-btn { background: #007bff; color: white; }
+#tap-btn { background: #00aa88; color: white; }
+
+#counter {
+    font-size: 90px;
+    font-weight: bold;
+    color: #00ff88;
+    margin: 20px 0;
+}
+
+#status-box {
+    background: #000;
+    padding: 10px;
+    color: #aaa;
+    border-radius: 8px;
+    font-size: 13px;
+    border: 1px solid #333;
+}
+</style>
 </head>
+
 <body>
 
 <div class="card">
-    <h2 style="color: #888; font-size: 16px; margin-bottom: 20px;">MANTRA COUNTER</h2>
-    
-    <div class="label">Choose Mantra:</div>
-    <select id="mantra-select"></select>
+<h2 style="color:#888;">🧘 MANTRA COUNTER</h2>
 
-    <div class="label">Chant Goal:</div>
-    <select id="target-select">
-        <option value="11">11 Times</option>
-        <option value="33">33 Times</option>
-        <option value="108" selected>108 Times</option>
-    </select>
+<select id="mantra-select"></select>
 
-    <div id="counter">0</div>
+<select id="target-select">
+<option value="11">11</option>
+<option value="33">33</option>
+<option value="108" selected>108</option>
+</select>
 
-    <button id="start-btn">START LISTENING</button>
+<div id="counter">0</div>
 
-    <div id="status-box">System Loading...</div>
+<button id="start-btn">START</button>
+<button id="tap-btn">TAP (MALA BEAD)</button>
+
+<div id="status-box">Ready</div>
 </div>
 
 <script>
-    // 1. CATCH ALL ERRORS (If the phone blocks something, we will see it here)
-    window.onerror = function(message, source, lineno) {
-        document.getElementById('status-box').innerText = "CRASH ERROR: " + message + " (Line " + lineno + ")";
-        return true; 
-    };
+window.onerror = function(msg, src, line) {
+    document.getElementById('status-box').innerText = "Error: " + msg;
+};
 
-    // 2. Only the requested Mantras
-    const mantras = [
-        "4 Mukhi | Om Hrim Namah",
-        "5 Mukhi | Om Hrim Namah",
-        "6 Mukhi | Om Hrim Hoom Namah",
-        "9 Mukhi | Om Hrim Hum Namah"
-    ];
+// -------------------- MANTRAS --------------------
+const mantras = [
+    "Om Hrim Namah",
+    "Om Hrim Hoom Namah",
+    "Om Hrim Hum Namah"
+];
 
-    // 3. UI Elements
-    const selectBox = document.getElementById('mantra-select');
-    const startBtn = document.getElementById('start-btn');
-    const counterText = document.getElementById('counter');
-    const statusBox = document.getElementById('status-box');
-    
-    let count = 0;
-    let isRunning = false;
-    let recognition = null;
-    let audioCtx = null;
+// -------------------- UI --------------------
+const selectBox = document.getElementById('mantra-select');
+const startBtn = document.getElementById('start-btn');
+const tapBtn = document.getElementById('tap-btn');
+const counterText = document.getElementById('counter');
+const statusBox = document.getElementById('status-box');
 
-    // 4. Populate Dropdown IMMEDIATELY (No waiting for page loads)
-    try {
-        mantras.forEach(function(m) {
-            const opt = document.createElement('option');
-            opt.value = m.toLowerCase();
-            opt.innerText = m;
-            selectBox.appendChild(opt);
-        });
-        statusBox.innerText = "System Ready. Tap Start.";
-    } catch(err) {
-        statusBox.innerText = "Failed to load list: " + err.message;
-    }
+let count = 0;
+let isRunning = false;
+let recognition = null;
+let audioCtx = null;
 
-    // 5. Setup Microphone & AI
-    try {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'hi-IN'; // Sanskrit/Hindi sounds
+// Populate dropdown
+mantras.forEach(m => {
+    let opt = document.createElement('option');
+    opt.value = m.toLowerCase();
+    opt.innerText = m;
+    selectBox.appendChild(opt);
+});
 
-            recognition.onresult = function(event) {
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        const word = event.results[i][0].transcript.toLowerCase();
-                        checkMatch(word);
-                    }
-                }
-            };
+// -------------------- SPEECH SETUP --------------------
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-            recognition.onend = function() {
-                if (isRunning) recognition.start();
-            };
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'hi-IN';
 
-            recognition.onerror = function(event) {
-                statusBox.innerText = "Mic Issue: " + event.error;
-            };
-        } else {
-            statusBox.innerText = "Error: Browser does not support Voice Recognition.";
-        }
-    } catch(err) {
-        statusBox.innerText = "Speech Engine Error: " + err.message;
-    }
-
-    // 6. Logic
-    function checkMatch(text) {
-        statusBox.innerText = "Heard: " + text;
-        const targetPhrase = selectBox.value;
-        
-        // Clean up AI mistakes
-        const cleanText = text.replace(/cream|clean/g, "klim")
-                              .replace(/green|dream|rim/g, "hrim")
-                              .replace(/home|room|whom/g, "hum");
-
-        // Check if the specific sound is heard
-        if (cleanText.includes(targetPhrase) || cleanText.includes("hrim")) {
-            count++;
-            counterText.innerText = count;
-            playBeep();
-            
-            const goal = parseInt(document.getElementById('target-select').value);
-            if (count >= goal) {
-                stopApp();
-                statusBox.innerText = "GOAL COMPLETED!";
+    recognition.onresult = function(event) {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+                let text = event.results[i][0].transcript.toLowerCase();
+                checkMatch(text);
             }
         }
-    }
+    };
 
-    // 7. Beep Sound
-    function playBeep() {
-        if (!audioCtx) return;
+    recognition.onend = function() {
+        if (isRunning) {
+            setTimeout(() => {
+                try { recognition.start(); } catch(e){}
+            }, 500);
+        }
+    };
+
+    recognition.onerror = function(e) {
+        statusBox.innerText = "Mic: " + e.error;
+    };
+
+} else {
+    statusBox.innerText = "Voice not supported. Use Chrome Android.";
+    startBtn.disabled = true;
+}
+
+// -------------------- MATCH LOGIC --------------------
+function checkMatch(text) {
+    statusBox.innerText = "Heard: " + text;
+
+    const clean = text
+        .replace(/green|dream|rim/g, "hrim")
+        .replace(/home|room|whom/g, "hum");
+
+    const keywords = ["om","hrim","hum","namah"];
+    let matchCount = keywords.filter(k => clean.includes(k)).length;
+
+    if (matchCount >= 2) triggerCount();
+}
+
+// -------------------- CORE COUNT --------------------
+function triggerCount() {
+    count++;
+    counterText.innerText = count;
+
+    playBeep();
+    vibrate();
+
+    let goal = parseInt(document.getElementById('target-select').value);
+    if (count >= goal) {
+        stopApp();
+        statusBox.innerText = "🟢 COMPLETED";
+        vibrate(300);
+    }
+}
+
+// -------------------- SOUND --------------------
+function playBeep() {
+    if (!audioCtx) return;
+
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.frequency.value = 600;
+        osc.start();
+
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+        osc.stop(audioCtx.currentTime + 0.1);
+    } catch(e){}
+}
+
+// -------------------- VIBRATION --------------------
+function vibrate(duration = 50) {
+    if (navigator.vibrate) {
+        navigator.vibrate(duration);
+    }
+}
+
+// -------------------- BUTTONS --------------------
+startBtn.onclick = async function() {
+    if (!isRunning) {
         try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.frequency.value = 600;
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
-            osc.stop(audioCtx.currentTime + 0.1);
-        } catch(e) {}
-    }
+            if (!audioCtx)
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // 8. Start & Stop Button Logic
-    startBtn.onclick = async function() {
-        if (!isRunning) {
-            try {
-                // Initialize Audio Context on click
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // Force Mic Permission
-                await navigator.mediaDevices.getUserMedia({ audio: true });
-                
-                count = 0;
-                counterText.innerText = "0";
-                isRunning = true;
-                
-                if (recognition) {
-                    recognition.start();
-                    startBtn.innerText = "STOP LISTENING";
-                    startBtn.style.background = "#ff4444";
-                    statusBox.innerText = "Listening...";
-                }
-            } catch(err) {
-                statusBox.innerText = "Permission Denied. Please allow Microphone.";
-            }
-        } else {
-            stopApp();
+            if (audioCtx.state === 'suspended')
+                await audioCtx.resume();
+
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            count = 0;
+            counterText.innerText = "0";
+            isRunning = true;
+
+            if (recognition) recognition.start();
+
+            startBtn.innerText = "STOP";
+            startBtn.style.background = "#ff4444";
+            statusBox.innerText = "Listening...";
+
+        } catch(e) {
+            statusBox.innerText = "Mic permission denied";
         }
-    };
 
-    function stopApp() {
-        isRunning = false;
-        if(recognition) recognition.stop();
-        startBtn.innerText = "START LISTENING";
-        startBtn.style.background = "#007bff";
+    } else {
+        stopApp();
     }
+};
+
+// Manual mala tap
+tapBtn.onclick = function() {
+    if (!isRunning) return;
+    triggerCount();
+};
+
+// Stop
+function stopApp() {
+    isRunning = false;
+    if (recognition) recognition.stop();
+
+    startBtn.innerText = "START";
+    startBtn.style.background = "#007bff";
+}
 </script>
+
 </body>
 </html>
