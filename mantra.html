@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mantra Counter</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f2f5; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        #counter { font-size: 80px; margin: 20px 0; color: #2ecc71; font-weight: bold; }
+        #start-btn { width: 100%; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 10px; border: none; color: white; background: #3498db; transition: 0.3s; }
+        #start-btn.active { background: #e74c3c; }
+        .log { margin-top: 20px; font-size: 14px; color: #7f8c8d; background: #eee; padding: 10px; border-radius: 5px; min-height: 40px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Mantra Counter</h2>
+    
+    <label>Mantra Word:</label>
+    <input type="text" id="mantra-input" value="om" placeholder="e.g. om">
+
+    <label>Goal:</label>
+    <select id="target-select">
+        <option value="11">11 Times</option>
+        <option value="33">33 Times</option>
+        <option value="108" selected>108 Times</option>
+    </select>
+
+    <div id="counter">0</div>
+
+    <button id="start-btn">TAP TO START</button>
+
+    <div class="log" id="log-box">Status: Ready</div>
+</div>
+
+<script>
+    let count = 0;
+    let isRunning = false;
+    let recognition;
+
+    const startBtn = document.getElementById('start-btn');
+    const counterDisplay = document.getElementById('counter');
+    const logBox = document.getElementById('log-box');
+    const mantraInput = document.getElementById('mantra-input');
+    const targetSelect = document.getElementById('target-select');
+
+    // 1. Initialize Speech Engine
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("Your browser does not support voice recognition. Please use Chrome on Android or Safari on iPhone.");
+    } else {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US'; // Change to 'hi-IN' for Hindi if needed
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+            const targetWord = mantraInput.value.trim().toLowerCase();
+            
+            logBox.innerText = "Heard: " + transcript;
+
+            if (transcript.includes(targetWord)) {
+                count++;
+                counterDisplay.innerText = count;
+
+                if (count >= parseInt(targetSelect.value)) {
+                    playBeep();
+                    stopApp();
+                    logBox.innerText = "Finished " + targetSelect.value + " chants!";
+                }
+            }
+        };
+
+        recognition.onerror = (event) => {
+            logBox.innerText = "Error: " + event.error;
+            if (event.error === 'not-allowed') {
+                alert("Permission denied. Please check your browser's microphone settings.");
+            }
+        };
+
+        recognition.onend = () => {
+            if (isRunning) recognition.start(); // Auto-restart if browser stops listening
+        };
+    }
+
+    // 2. Start/Stop Logic
+    async function startApp() {
+        // Essential: Initialize Audio Context on first click for iOS/Android
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const tempCtx = new AudioContext();
+
+        try {
+            // Force browser to prompt for microphone
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            count = 0;
+            counterDisplay.innerText = count;
+            isRunning = true;
+            recognition.start();
+            
+            startBtn.innerText = "STOP CHANTING";
+            startBtn.classList.add('active');
+            logBox.innerText = "Listening...";
+        } catch (err) {
+            alert("Microphone access is required. Please allow it when prompted.");
+            logBox.innerText = "Status: Permission Denied";
+        }
+    }
+
+    function stopApp() {
+        isRunning = false;
+        recognition.stop();
+        startBtn.innerText = "TAP TO START";
+        startBtn.classList.remove('active');
+    }
+
+    startBtn.onclick = () => {
+        if (!isRunning) startApp();
+        else stopApp();
+    };
+
+    function playBeep() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1);
+        osc.stop(ctx.currentTime + 1);
+    }
+</script>
+</body>
+</html>
