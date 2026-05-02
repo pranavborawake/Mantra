@@ -6,55 +6,46 @@
     <title>Mantra Master Pro</title>
     <style>
         :root { --neon: #00ff88; --bg: #0a0a0a; --card: #161616; }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: #fff; text-align: center; margin: 0; padding: 15px; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #fff; text-align: center; margin: 0; padding: 15px; }
         .card { background: var(--card); padding: 20px; border-radius: 28px; border: 1px solid #333; max-width: 480px; margin: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
         h2 { font-size: 14px; letter-spacing: 3px; color: #777; margin-bottom: 20px; text-transform: uppercase; }
-        
-        select { width: 100%; padding: 16px; background: #222; color: #fff; border: 1px solid #444; border-radius: 12px; font-size: 16px; margin-bottom: 15px; }
-        
-        #counter-container { position: relative; margin: 20px 0; }
-        #counter { font-size: 120px; font-weight: 800; color: var(--neon); line-height: 1; text-shadow: 0 0 30px rgba(0,255,136,0.2); }
-        
+        select { width: 100%; padding: 16px; background: #222; color: #fff; border: 1px solid #444; border-radius: 12px; font-size: 16px; margin-bottom: 15px; display: block; }
+        #counter { font-size: 120px; font-weight: 800; color: var(--neon); line-height: 1; margin: 20px 0; text-shadow: 0 0 30px rgba(0,255,136,0.2); }
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        button { flex: 1; padding: 18px; border-radius: 15px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        
+        button { flex: 1; padding: 18px; border-radius: 15px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
         #start-btn { background: #007bff; color: white; }
         #start-btn.active { background: #ff3b30; }
         #manual-btn { background: #333; color: var(--neon); flex: 0 0 60px; font-size: 24px; }
-        
-        .status-box { background: #000; padding: 12px; border-radius: 10px; font-size: 12px; color: #666; min-height: 30px; border: 1px solid #222; }
-        .setting-label { text-align: left; font-size: 11px; color: #555; margin: 10px 0 5px 5px; text-transform: uppercase; }
+        .status-box { background: #000; padding: 12px; border-radius: 10px; font-size: 12px; color: #666; min-height: 30px; border: 1px solid #222; margin-top: 10px; }
+        .label { text-align: left; font-size: 11px; color: #555; margin: 10px 0 5px 5px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Beej Mantra Counter</h2>
+    <h2>Mantra Counter</h2>
     
-    <div class="setting-label">Select Your Mantra:</div>
+    <div class="label">Choose Mantra:</div>
     <select id="mantra-select"></select>
 
-    <div class="setting-label">Target Chants:</div>
+    <div class="label">Chant Goal:</div>
     <select id="target-select">
         <option value="11">11 Times</option>
         <option value="33">33 Times</option>
         <option value="108" selected>108 Times</option>
     </select>
 
-    <div id="counter-container">
-        <div id="counter">0</div>
-    </div>
+    <div id="counter">0</div>
 
     <div class="btn-group">
         <button id="start-btn">START LISTENING</button>
-        <button id="manual-btn" title="Manual Count">+</button>
+        <button id="manual-btn">+</button>
     </div>
 
-    <div class="status-box" id="status">Ready...</div>
+    <div class="status-box" id="status">System Ready</div>
 </div>
 
 <script>
-    // FULL DATABASE FROM IMAGES
     const mantras = [
         { n: "1 Mukhi", e: "Om Hrim Namah" },
         { n: "2 Mukhi", e: "Om Namah" },
@@ -88,120 +79,116 @@
     let isListening = false;
     let recognition;
     let audioCtx;
-    const status = document.getElementById('status');
+    
+    const statusBox = document.getElementById('status');
     const counterDisplay = document.getElementById('counter');
     const mantraSelect = document.getElementById('mantra-select');
+    const startBtn = document.getElementById('start-btn');
 
-    // Populate List
-    mantras.forEach((m, i) => {
-        let opt = document.createElement('option');
-        opt.value = i;
-        opt.innerText = ${m.n} | ${m.e};
-        mantraSelect.appendChild(opt);
-    });
+    // Initialize Dropdown
+    function initDropdown() {
+        mantras.forEach((m, i) => {
+            let opt = document.createElement('option');
+            opt.value = i;
+            opt.text = ${m.n}: ${m.e};
+            mantraSelect.add(opt);
+        });
+    }
+    initDropdown();
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.continuous = true;
-        recognition.interimResults = true; // Essential for Android speed
-        recognition.lang = 'hi-IN'; // Better for Sanskrit phonetics on Android
+        recognition.interimResults = true;
+        recognition.lang = 'hi-IN';
 
         recognition.onresult = (event) => {
-            let transcript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
-                    transcript = event.results[i][0].transcript.toLowerCase();
-                    processChant(transcript);
+                    const text = event.results[i][0].transcript.toLowerCase();
+                    checkChant(text);
                 }
             }
         };
 
         recognition.onend = () => { if (isListening) recognition.start(); };
-        recognition.onerror = (e) => { status.innerText = "Error: " + e.error; };
+        recognition.onerror = (e) => { statusBox.innerText = "Error: " + e.error; };
     }
 
-    function processChant(text) {
-        status.innerText = "Heard: " + text;
+    function checkChant(text) {
+        statusBox.innerText = "Heard: " + text;
         const target = mantras[mantraSelect.value].e.toLowerCase();
         
-        // Android Speech Cleanup
-        const clean = text.replace(/cream/g, "klim").replace(/green|dream/g, "hrim").replace(/home|room/g, "hum");
+        // Android Speech phonetic mapping
+        const clean = text.replace(/cream/g, "klim").replace(/green|dream/g, "hrim").replace(/home|room|whom/g, "hum");
         
-        // We look for any "core" part of the mantra to ensure it counts even if 1 word is missed
+        // Look for the specific Beej or the whole phrase
         const targetWords = target.split(" ");
-        const coreBeej = targetWords[1]; // Usually Hrim, Klim, etc.
+        const beej = targetWords[1] || targetWords[0];
 
-        if (clean.includes(target) || clean.includes(coreBeej)) {
-            increment();
+        if (clean.includes(target) || clean.includes(beej)) {
+            addCount();
         }
     }
 
-    function increment() {
+    function addCount() {
         count++;
         counterDisplay.innerText = count;
-        const targetGoal = parseInt(document.getElementById('target-select').value);
+        const goal = parseInt(document.getElementById('target-select').value);
         
-        if (count >= targetGoal) {
-            playFinalSound();
-            stopApp();
-            status.innerText = "Goal of " + targetGoal + " Complete!";
+        if (count >= goal) {
+            playSimpleBeep(880, 1);
+            stopEverything();
+            statusBox.innerText = "FINISHED!";
         } else if (count % 11 === 0) {
-            playShortBeep();
+            playSimpleBeep(440, 0.2);
         }
     }
 
-    async function startApp() {
-        if (!audioCtx) audioCtx = new AudioContext();
+    async function startEverything() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         try {
             await navigator.mediaDevices.getUserMedia({ audio: true });
             count = 0;
             counterDisplay.innerText = "0";
             isListening = true;
             recognition.start();
-            document.getElementById('start-btn').innerText = "STOP";
-            document.getElementById('start-btn').classList.add('active');
-            status.innerText = "Listening...";
-        } catch (e) { alert("Please allow Microphone access."); }
+            startBtn.innerText = "STOP";
+            startBtn.classList.add('active');
+            statusBox.innerText = "Listening...";
+        } catch (e) {
+            alert("Microphone access denied. Please open this via HTTPS.");
+        }
     }
 
-    function stopApp() {
+    function stopEverything() {
         isListening = false;
-        recognition.stop();
-        document.getElementById('start-btn').innerText = "START LISTENING";
-        document.getElementById('start-btn').classList.remove('active');
+        if(recognition) recognition.stop();
+        startBtn.innerText = "START LISTENING";
+        startBtn.classList.remove('active');
     }
 
-    document.getElementById('start-btn').onclick = () => {
-        if (!isListening) startApp();
-        else stopApp();
+    startBtn.onclick = () => {
+        if (!isListening) startEverything();
+        else stopEverything();
     };
 
     document.getElementById('manual-btn').onclick = () => {
-        if (!audioCtx) audioCtx = new AudioContext();
-        increment();
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        addCount();
     };
 
-    function playShortBeep() {
+    function playSimpleBeep(freq, duration) {
+        if (!audioCtx) return;
         const osc = audioCtx.createOscillator();
         const g = audioCtx.createGain();
         osc.connect(g); g.connect(audioCtx.destination);
-        osc.frequency.value = 600;
+        osc.frequency.value = freq;
         osc.start();
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
-        osc.stop(audioCtx.currentTime + 0.2);
-    }
-
-    function playFinalSound() {
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.connect(g); g.connect(audioCtx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-        osc.start();
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2);
-        osc.stop(audioCtx.currentTime + 2);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
     }
 </script>
 </body>
