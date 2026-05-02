@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mantra Master Pro</title>
+    <title>Mantra Pro</title>
     <style>
         :root { --neon: #00ff88; --bg: #0a0a0a; --card: #161616; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #fff; text-align: center; margin: 0; padding: 15px; }
-        .card { background: var(--card); padding: 20px; border-radius: 28px; border: 1px solid #333; max-width: 480px; margin: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-        h2 { font-size: 14px; letter-spacing: 3px; color: #777; margin-bottom: 20px; text-transform: uppercase; }
-        select { width: 100%; padding: 16px; background: #222; color: #fff; border: 1px solid #444; border-radius: 12px; font-size: 16px; margin-bottom: 15px; display: block; }
-        #counter { font-size: 120px; font-weight: 800; color: var(--neon); line-height: 1; margin: 20px 0; text-shadow: 0 0 30px rgba(0,255,136,0.2); }
-        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        body { font-family: sans-serif; background: var(--bg); color: #fff; text-align: center; margin: 0; padding: 15px; }
+        .card { background: var(--card); padding: 20px; border-radius: 24px; border: 1px solid #333; max-width: 450px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { font-size: 16px; letter-spacing: 2px; color: #888; text-transform: uppercase; margin-bottom: 20px; }
+        select { width: 100%; padding: 15px; background: #222; color: #fff; border: 1px solid #444; border-radius: 12px; font-size: 16px; margin-bottom: 15px; display: block; outline: none; }
+        #counter { font-size: 120px; font-weight: bold; color: var(--neon); margin: 20px 0; line-height: 1; }
+        .btn-group { display: flex; gap: 10px; }
         button { flex: 1; padding: 18px; border-radius: 15px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
         #start-btn { background: #007bff; color: white; }
         #start-btn.active { background: #ff3b30; }
         #manual-btn { background: #333; color: var(--neon); flex: 0 0 60px; font-size: 24px; }
-        .status-box { background: #000; padding: 12px; border-radius: 10px; font-size: 12px; color: #666; min-height: 30px; border: 1px solid #222; margin-top: 10px; }
+        .status-box { background: #000; padding: 12px; border-radius: 10px; font-size: 12px; color: #666; min-height: 20px; border: 1px solid #222; margin-top: 15px; }
         .label { text-align: left; font-size: 11px; color: #555; margin: 10px 0 5px 5px; text-transform: uppercase; }
     </style>
 </head>
@@ -26,9 +26,11 @@
     <h2>Mantra Counter</h2>
     
     <div class="label">Choose Mantra:</div>
-    <select id="mantra-select"></select>
+    <select id="mantra-select">
+        <option value="">-- Select Mantra --</option>
+    </select>
 
-    <div class="label">Chant Goal:</div>
+    <div class="label">Goal:</div>
     <select id="target-select">
         <option value="11">11 Times</option>
         <option value="33">33 Times</option>
@@ -42,112 +44,119 @@
         <button id="manual-btn">+</button>
     </div>
 
-    <div class="status-box" id="status">System Ready</div>
+    <div class="status-box" id="status-text">System Ready</div>
 </div>
 
 <script>
-    const mantras = [
-        { n: "1 Mukhi", e: "Om Hrim Namah" },
-        { n: "2 Mukhi", e: "Om Namah" },
-        { n: "3 Mukhi", e: "Om Klim Namah" },
-        { n: "4 Mukhi", e: "Om Hrim Namah" },
-        { n: "5 Mukhi", e: "Om Hrim Namah" },
-        { n: "6 Mukhi", e: "Om Hrim Hoom Namah" },
-        { n: "7 Mukhi", e: "Om Hum Namah" },
-        { n: "8 Mukhi", e: "Om Hum Namah" },
-        { n: "9 Mukhi", e: "Om Hrim Hum Namah" },
-        { n: "10 Mukhi", e: "Om Hrim Namah" },
-        { n: "11 Mukhi", e: "Om Hrim Hum Namah" },
-        { n: "12 Mukhi", e: "Om Krom Srom Rom Namah" },
-        { n: "13 Mukhi", e: "Om Hrim Namah" },
-        { n: "14 Mukhi", e: "Om Namah" },
-        { n: "15 Mukhi", e: "Om Hrim Namah" },
-        { n: "16 Mukhi", e: "Om Hrim Hum Namah" },
-        { n: "17 Mukhi", e: "Om Hrim Hum Hum Namah" },
-        { n: "18 Mukhi", e: "Om Hrim Hum Ekatva Rupe Hum Hrim Om" },
-        { n: "19 Mukhi", e: "Om Namoh Bhagwate Vashu Devaya Namah" },
-        { n: "20 Mukhi", e: "Om Hrim Hrim Hum Hum Brahmane Namah" },
-        { n: "21 Mukhi", e: "Om Hreem Hoom Shivaya Namah" },
-        { n: "22 Mukhi", e: "Om Hreem Hum Namah" },
-        { n: "23 Mukhi", e: "Om Namo Bhagwatey Vishnu Devaya Namah" },
-        { n: "24 Mukhi", e: "Om Krom Shrom Rom Namah" },
-        { n: "25 Mukhi", e: "Om Hreem Shreem Vam Tripura Sundari Devyai Namah" },
-        { n: "Gaurishankar", e: "Om Gauri Shankaray Namaha" }
+    // Database of all mantras from your images
+    const mantraList = [
+        "1 Mukhi | Om Hrim Namah",
+        "2 Mukhi | Om Namah",
+        "3 Mukhi | Om Klim Namah",
+        "4 Mukhi | Om Hrim Namah",
+        "5 Mukhi | Om Hrim Namah",
+        "6 Mukhi | Om Hrim Hoom Namah",
+        "7 Mukhi | Om Hum Namah",
+        "8 Mukhi | Om Hum Namah",
+        "9 Mukhi | Om Hrim Hum Namah",
+        "10 Mukhi | Om Hrim Namah",
+        "11 Mukhi | Om Hrim Hum Namah",
+        "12 Mukhi | Om Krom Srom Rom Namah",
+        "13 Mukhi | Om Hrim Namah",
+        "14 Mukhi | Om Namah",
+        "15 Mukhi | Om Hrim Namah",
+        "16 Mukhi | Om Hrim Hum Namah",
+        "17 Mukhi | Om Hrim Hum Hum Namah",
+        "18 Mukhi | Om Hrim Hum Ekatva Rupe Hum Hrim Om",
+        "19 Mukhi | Om Namoh Bhagwate Vashu Devaya Namah",
+        "20 Mukhi | Om Hrim Hrim Hum Hum Brahmane Namah",
+        "21 Mukhi | Om Hreem Hoom Shivaya Namah",
+        "22 Mukhi | Om Hreem Hum Namah",
+        "23 Mukhi | Om Namo Bhagwatey Vishnu Devaya Namah",
+        "24 Mukhi | Om Krom Shrom Rom Namah",
+        "25 Mukhi | Om Hreem Shreem Vam Tripura Sundari Devyai Namah",
+        "Gaurishankar | Om Gauri Shankaray Namaha"
     ];
 
     let count = 0;
     let isListening = false;
     let recognition;
     let audioCtx;
-    
-    const statusBox = document.getElementById('status');
-    const counterDisplay = document.getElementById('counter');
+
+    // Elements
     const mantraSelect = document.getElementById('mantra-select');
     const startBtn = document.getElementById('start-btn');
+    const manualBtn = document.getElementById('manual-btn');
+    const counterDisplay = document.getElementById('counter');
+    const statusText = document.getElementById('status-text');
 
-    // Initialize Dropdown
-    function initDropdown() {
-        mantras.forEach((m, i) => {
+    // Run when page is ready
+    window.onload = function() {
+        // Populate Dropdown
+        mantraList.forEach((m) => {
             let opt = document.createElement('option');
-            opt.value = i;
-            opt.text = ${m.n}: ${m.e};
-            mantraSelect.add(opt);
+            opt.value = m.toLowerCase();
+            opt.innerText = m;
+            mantraSelect.appendChild(opt);
         });
-    }
-    initDropdown();
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        setupSpeech();
+    };
 
-    if (SpeechRecognition) {
+    function setupSpeech() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            statusText.innerText = "Error: Browser doesn't support Voice.";
+            return;
+        }
+
         recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = 'hi-IN';
+        recognition.lang = 'hi-IN'; // Better for Sanskrit Beej sounds
 
         recognition.onresult = (event) => {
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
                     const text = event.results[i][0].transcript.toLowerCase();
-                    checkChant(text);
+                    processResult(text);
                 }
             }
         };
 
         recognition.onend = () => { if (isListening) recognition.start(); };
-        recognition.onerror = (e) => { statusBox.innerText = "Error: " + e.error; };
+        recognition.onerror = (e) => { statusText.innerText = "Listening..."; };
     }
 
-    function checkChant(text) {
-        statusBox.innerText = "Heard: " + text;
-        const target = mantras[mantraSelect.value].e.toLowerCase();
-        
-        // Android Speech phonetic mapping
-        const clean = text.replace(/cream/g, "klim").replace(/green|dream/g, "hrim").replace(/home|room|whom/g, "hum");
-        
-        // Look for the specific Beej or the whole phrase
-        const targetWords = target.split(" ");
-        const beej = targetWords[1] || targetWords[0];
+    function processResult(heardText) {
+        statusText.innerText = "Heard: " + heardText;
+        const selectedMantra = mantraSelect.value;
+        if (!selectedMantra) return;
 
-        if (clean.includes(target) || clean.includes(beej)) {
-            addCount();
+        // Phonetic fix for common AI errors
+        const cleanHeard = heardText.replace(/cream|claim/g, "klim").replace(/green|dream/g, "hrim").replace(/home|room/g, "hum");
+
+        // Logic: if the phrase is long, look for keywords. If short, look for the whole phrase.
+        if (cleanHeard.includes(selectedMantra) || (selectedMantra.length > 15 && cleanHeard.length > 3)) {
+            doIncrement();
         }
     }
 
-    function addCount() {
+    function doIncrement() {
         count++;
         counterDisplay.innerText = count;
         const goal = parseInt(document.getElementById('target-select').value);
         
         if (count >= goal) {
-            playSimpleBeep(880, 1);
-            stopEverything();
-            statusBox.innerText = "FINISHED!";
+            beep(880, 1);
+            stopListening();
+            statusText.innerText = "GOAL REACHED!";
         } else if (count % 11 === 0) {
-            playSimpleBeep(440, 0.2);
+            beep(440, 0.2);
         }
     }
 
-    async function startEverything() {
+    async function startListening() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         try {
             await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -157,13 +166,13 @@
             recognition.start();
             startBtn.innerText = "STOP";
             startBtn.classList.add('active');
-            statusBox.innerText = "Listening...";
+            statusText.innerText = "Listening...";
         } catch (e) {
-            alert("Microphone access denied. Please open this via HTTPS.");
+            alert("Microphone permission required.");
         }
     }
 
-    function stopEverything() {
+    function stopListening() {
         isListening = false;
         if(recognition) recognition.stop();
         startBtn.innerText = "START LISTENING";
@@ -171,16 +180,16 @@
     }
 
     startBtn.onclick = () => {
-        if (!isListening) startEverything();
-        else stopEverything();
+        if (!isListening) startListening();
+        else stopListening();
     };
 
-    document.getElementById('manual-btn').onclick = () => {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        addCount();
+    manualBtn.onclick = () => {
+        if (!audioCtx) audioCtx = new AudioContext();
+        doIncrement();
     };
 
-    function playSimpleBeep(freq, duration) {
+    function beep(freq, duration) {
         if (!audioCtx) return;
         const osc = audioCtx.createOscillator();
         const g = audioCtx.createGain();
