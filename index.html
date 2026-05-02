@@ -3,716 +3,739 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Mantra Pro</title>
+<title>Rudraksha Mantra Counter — ॐ</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --gold: #c9a84c;
-    --gold-light: #f0d080;
-    --gold-dim: #7a6030;
-    --amber: #e08030;
-    --bg: #080604;
-    --surface: #100e0a;
-    --surface2: #1a1710;
-    --border: #2a2418;
-    --text: #e8dcc8;
-    --text-dim: #7a7060;
-    --green: #40c080;
-    --red: #c04040;
+    --gold: #c9a84c; --gold-light: #f0d080; --gold-dim: #7a6030;
+    --amber: #e08030; --bg: #080604; --surface: #100e0a;
+    --surface2: #1a1710; --surface3: #221f14;
+    --border: #2a2418; --border2: #3a3020;
+    --text: #e8dcc8; --text-dim: #7a7060;
+    --green: #40c080; --red: #c04040;
   }
-
+  html { scroll-behavior: smooth; }
   body {
     font-family: 'Crimson Text', Georgia, serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    overflow-x: hidden;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; padding: 16px 16px 40px; overflow-x: hidden;
   }
-
-  /* Ambient glow background */
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
+    content: ''; position: fixed; inset: 0;
     background:
       radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%),
       radial-gradient(ellipse 40% 60% at 80% 80%, rgba(224,128,48,0.04) 0%, transparent 60%);
-    pointer-events: none;
+    pointer-events: none; z-index: 0;
   }
+  .page { position: relative; z-index: 1; max-width: 460px; margin: 0 auto; }
 
+  /* TABS */
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 5px;
+  }
+  .tab-btn {
+    flex: 1; padding: 10px 4px; border: none; border-radius: 10px;
+    background: transparent; color: var(--text-dim);
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 0.12em; cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn.active { background: linear-gradient(135deg, var(--gold), var(--amber)); color: #1a0e00; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* CARD */
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 28px 24px;
-    max-width: 420px;
-    width: 100%;
-    position: relative;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 24px; padding: 24px 20px; position: relative;
     box-shadow: 0 0 60px rgba(201,168,76,0.06), 0 20px 40px rgba(0,0,0,0.6);
+    margin-bottom: 14px;
   }
-
-  /* Decorative top border */
   .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 20%; right: 20%;
-    height: 1px;
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
   }
 
-  .header {
-    text-align: center;
-    margin-bottom: 24px;
-  }
-
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 20px; }
   .header .om {
-    font-family: 'Cinzel', serif;
-    font-size: 28px;
-    color: var(--gold);
-    letter-spacing: 0.1em;
-    margin-bottom: 4px;
-    text-shadow: 0 0 20px rgba(201,168,76,0.4);
+    font-family: 'Cinzel', serif; font-size: 26px; color: var(--gold);
+    text-shadow: 0 0 20px rgba(201,168,76,0.4); margin-bottom: 2px;
   }
-
   .header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: 0.35em;
-    color: var(--text-dim);
-    text-transform: uppercase;
+    font-family: 'Cinzel', serif; font-size: 11px; font-weight: 400;
+    letter-spacing: 0.4em; color: var(--text-dim); text-transform: uppercase;
   }
 
-  /* Divider */
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 18px 0;
-    color: var(--gold-dim);
-    font-size: 10px;
-    letter-spacing: 0.2em;
-  }
-  .divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* Select fields */
+  /* FIELDS */
+  .field { margin-bottom: 12px; }
   .field-label {
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 6px;
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 5px;
   }
-
-  .field { margin-bottom: 14px; }
-
   select {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 15px;
-    font-family: 'Crimson Text', serif;
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border);
-    appearance: none;
+    width: 100%; padding: 11px 14px; border-radius: 10px; font-size: 14px;
+    font-family: 'Crimson Text', serif; background: var(--surface2);
+    color: var(--text); border: 1px solid var(--border); appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7060' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    cursor: pointer;
-    transition: border-color 0.2s;
+    background-repeat: no-repeat; background-position: right 14px center; cursor: pointer;
   }
   select:focus { outline: none; border-color: var(--gold-dim); }
 
-  /* Counter ring */
-  .counter-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 20px 0;
-    position: relative;
+  /* MANTRA DISPLAY */
+  .mantra-display {
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 10px 14px; text-align: center; margin-bottom: 12px;
   }
+  .mantra-sanskrit { font-size: 17px; color: var(--gold-light); letter-spacing: 0.04em; margin-bottom: 3px; }
+  .mantra-hindi { font-size: 14px; color: var(--text-dim); font-style: italic; }
 
-  .ring-container {
-    position: relative;
-    width: 180px;
-    height: 180px;
-  }
+  /* DIVIDER */
+  .divider { display: flex; align-items: center; gap: 10px; margin: 12px 0; color: var(--gold-dim); font-size: 10px; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  .progress-ring {
-    transform: rotate(-90deg);
-    width: 180px;
-    height: 180px;
-  }
-
-  .ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+  /* RING */
+  .counter-wrap { display: flex; flex-direction: column; align-items: center; margin: 14px 0; }
+  .ring-container { position: relative; width: 170px; height: 170px; }
+  .progress-ring { transform: rotate(-90deg); width: 170px; height: 170px; }
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 7; }
   .ring-fill {
-    fill: none;
-    stroke: var(--gold);
-    stroke-width: 6;
-    stroke-linecap: round;
-    stroke-dasharray: 502;
-    stroke-dashoffset: 502;
+    fill: none; stroke: var(--gold); stroke-width: 7; stroke-linecap: round;
+    stroke-dasharray: 452.39; stroke-dashoffset: 452.39;
     transition: stroke-dashoffset 0.4s ease, stroke 0.3s;
     filter: drop-shadow(0 0 6px rgba(201,168,76,0.5));
   }
-
   .counter-inner {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
   }
-
   #counter {
-    font-family: 'Cinzel', serif;
-    font-size: 64px;
-    font-weight: 900;
-    color: var(--gold-light);
-    line-height: 1;
-    text-shadow: 0 0 30px rgba(201,168,76,0.4);
-    transition: transform 0.1s;
+    font-family: 'Cinzel', serif; font-size: 58px; font-weight: 900;
+    color: var(--gold-light); line-height: 1;
+    text-shadow: 0 0 30px rgba(201,168,76,0.4); transition: transform 0.1s;
+  }
+  #counter.pulse { transform: scale(1.1); }
+  .counter-goal { font-size: 11px; color: var(--text-dim); letter-spacing: 0.15em; margin-top: 2px; }
+
+  /* MODE TOGGLE */
+  .mode-toggle { display: flex; gap: 6px; margin-bottom: 12px; }
+  .mode-btn {
+    flex: 1; padding: 9px 4px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface2); color: var(--text-dim);
+    font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.1em;
+    cursor: pointer; transition: all 0.2s; line-height: 1.6;
+  }
+  .mode-btn.active { border-color: var(--gold-dim); color: var(--gold); background: #1e1a0f; }
+
+  /* SLIDER */
+  .slider-wrap { margin-bottom: 12px; }
+  .slider-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .slider-val { font-size: 12px; color: var(--gold); font-family: 'Cinzel', serif; }
+  input[type=range] {
+    width: 100%; -webkit-appearance: none; height: 4px;
+    border-radius: 2px; background: var(--border); outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--gold); cursor: pointer; box-shadow: 0 0 8px rgba(201,168,76,0.4);
   }
 
-  #counter.pulse {
-    transform: scale(1.08);
-  }
-
-  .counter-goal {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.15em;
-    margin-top: 2px;
-  }
-
-  /* Buttons */
+  /* BUTTONS */
   .btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    font-family: 'Cinzel', serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-    margin-bottom: 10px;
+    width: 100%; padding: 13px; border-radius: 12px; font-family: 'Cinzel', serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.2em;
+    cursor: pointer; border: none; transition: all 0.2s; margin-bottom: 8px;
   }
-
   #start-btn {
     background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
-    color: #1a0e00;
-    box-shadow: 0 4px 20px rgba(201,168,76,0.25);
+    color: #1a0e00; box-shadow: 0 4px 20px rgba(201,168,76,0.25);
   }
-  #start-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,168,76,0.35); }
-  #start-btn.stop {
-    background: linear-gradient(135deg, #c04040, #8a2020);
-    box-shadow: 0 4px 20px rgba(192,64,64,0.25);
-    color: white;
-  }
-
-  #tap-btn {
-    background: var(--surface2);
-    color: var(--gold);
-    border: 1px solid var(--gold-dim);
-    letter-spacing: 0.15em;
-  }
-  #tap-btn:hover { background: #252018; }
-  #tap-btn:active { transform: scale(0.97); }
-
+  #start-btn:hover { transform: translateY(-1px); }
+  #start-btn.stop { background: linear-gradient(135deg, #c04040, #8a2020); color: white; }
   #reset-btn {
-    background: transparent;
-    color: var(--text-dim);
-    border: 1px solid var(--border);
-    font-size: 11px;
-    padding: 10px;
-    letter-spacing: 0.2em;
+    background: transparent; color: var(--text-dim);
+    border: 1px solid var(--border); font-size: 11px; padding: 10px;
   }
   #reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
 
-  /* Status box */
+  /* STATUS */
   #status-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 13px;
-    color: var(--text-dim);
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 4px;
-    font-family: 'Crimson Text', serif;
-    font-style: italic;
-    transition: border-color 0.3s;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 13px; font-size: 13px;
+    color: var(--text-dim); min-height: 38px;
+    display: flex; align-items: center; gap: 8px;
+    font-style: italic; transition: border-color 0.3s; margin-top: 4px;
   }
   #status-box.listening { border-color: var(--green); color: #70d090; }
-  #status-box.matched { border-color: var(--gold); color: var(--gold-light); }
-  #status-box.error { border-color: var(--red); color: #e08080; }
-  #status-box.done { border-color: var(--green); color: var(--green); font-style: normal; font-weight: 600; }
-
-  .status-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: currentColor;
-    flex-shrink: 0;
-    animation: blink 1.2s infinite;
-  }
+  #status-box.matched   { border-color: var(--gold);  color: var(--gold-light); }
+  #status-box.error     { border-color: var(--red);   color: #e08080; }
+  #status-box.done      { border-color: var(--green); color: var(--green); font-style: normal; font-weight: 600; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; animation: blink 1.2s infinite; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
   .status-dot.static { animation: none; }
+  #heard-box { font-size: 11px; color: var(--text-dim); text-align: center; margin-top: 7px; min-height: 15px; font-style: italic; opacity: 0.7; }
 
-  /* Debug heard text */
-  #heard-box {
-    font-size: 11px;
-    color: var(--text-dim);
-    text-align: center;
-    margin-top: 8px;
-    min-height: 16px;
-    font-style: italic;
-    opacity: 0.7;
+  /* INFO TAB */
+  .info-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; padding: 20px; margin-bottom: 12px; position: relative; overflow: hidden;
   }
+  .info-card::before {
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .mukhi-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--gold-dim), #4a3a18);
+    border-radius: 8px; padding: 5px 12px; margin-bottom: 12px;
+  }
+  .mukhi-badge .num { font-family: 'Cinzel', serif; font-size: 22px; color: var(--gold-light); font-weight: 900; }
+  .mukhi-badge .label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase; }
+  .info-mantra-line { font-size: 15px; color: var(--gold); margin-bottom: 3px; font-family: 'Cinzel', serif; }
+  .info-deity { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; font-style: italic; }
+  .info-section-label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 5px; margin-top: 10px; }
+  .info-text { font-size: 14px; color: var(--text); line-height: 1.6; }
+  .benefit-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .tag { background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 3px 9px; font-size: 11px; color: var(--text-dim); }
+  .info-nav { display: flex; gap: 8px; margin-bottom: 12px; }
+  .info-nav-btn {
+    flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--surface2); color: var(--text-dim); font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s;
+  }
+  .info-nav-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .info-search {
+    width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 14px;
+    font-family: 'Crimson Text', serif; background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border); margin-bottom: 12px;
+  }
+  .info-search:focus { outline: none; border-color: var(--gold-dim); }
+  .info-search::placeholder { color: var(--text-dim); font-style: italic; }
 
-  /* Sensitivity slider */
-  .slider-wrap { margin-bottom: 14px; }
-  .slider-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .slider-val { font-size: 12px; color: var(--gold); font-family: 'Cinzel', serif; }
-  input[type=range] {
-    width: 100%;
-    -webkit-appearance: none;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--border);
-    outline: none;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: var(--gold);
-    cursor: pointer;
-    box-shadow: 0 0 8px rgba(201,168,76,0.4);
-  }
+  /* STATS */
+  .stats-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .stat-box { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; }
+  .stat-num { font-family: 'Cinzel', serif; font-size: 20px; color: var(--gold); }
+  .stat-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; }
+
+  .footer-note { text-align: center; font-size: 11px; color: var(--text-dim); font-style: italic; margin-top: 10px; opacity: 0.6; }
 </style>
 </head>
 <body>
+<div class="page">
 
-<div class="card">
-  <div class="header">
-    <div class="om">ॐ</div>
-    <h1>Mantra Counter</h1>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('counter', this)">OM COUNTER</button>
+    <button class="tab-btn" onclick="showTab('info', this)">RUDRAKSHA INFO</button>
+    <button class="tab-btn" onclick="showTab('stats', this)">MY STATS</button>
   </div>
 
-  <div class="field">
-    <div class="field-label">Select Mantra</div>
-    <select id="mantra-select"></select>
-  </div>
-
-  <div class="field">
-    <div class="field-label">Target Count</div>
-    <select id="target-select">
-      <option value="11">11 repetitions</option>
-      <option value="33">33 repetitions</option>
-      <option value="108" selected>108 repetitions (full mala)</option>
-    </select>
-  </div>
-
-  <div class="divider">✦</div>
-
-  <div class="counter-wrap">
-    <div class="ring-container">
-      <svg class="progress-ring" viewBox="0 0 180 180">
-        <circle class="ring-bg" cx="90" cy="90" r="80"/>
-        <circle class="ring-fill" id="ring" cx="90" cy="90" r="80"/>
-      </svg>
-      <div class="counter-inner">
-        <div id="counter">0</div>
-        <div class="counter-goal" id="goal-label">of 108</div>
+  <!-- COUNTER TAB -->
+  <div class="tab-panel active" id="tab-counter">
+    <div class="card">
+      <div class="header">
+        <div class="om">ॐ</div>
+        <h1>Rudraksha Mantra Counter</h1>
       </div>
+
+      <div class="field">
+        <div class="field-label">Select Rudraksha Mukhi</div>
+        <select id="mantra-select" onchange="onMantraChange()"></select>
+      </div>
+
+      <div class="mantra-display">
+        <div class="mantra-sanskrit" id="mantra-text">Om Hrim Namah</div>
+        <div class="mantra-hindi" id="mantra-hindi">Om Hrim Namah</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Target Count</div>
+        <select id="target-select" onchange="onTargetChange()">
+          <option value="11">11 — Ekadashi</option>
+          <option value="33">33 — Tridasha</option>
+          <option value="54">54 — Half Mala</option>
+          <option value="108" selected>108 — Full Mala</option>
+        </select>
+      </div>
+
+      <div class="divider">✦</div>
+
+      <div class="field-label" style="margin-bottom:7px">Detection Mode</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="mode-namah" onclick="setMode('namah')">
+          NAMAH ONLY<br><span style="font-size:8px;opacity:0.7">Fast &amp; Accurate</span>
+        </button>
+        <button class="mode-btn" id="mode-full" onclick="setMode('full')">
+          FULL MANTRA<br><span style="font-size:8px;opacity:0.7">Strict Match</span>
+        </button>
+      </div>
+
+      <div class="counter-wrap">
+        <div class="ring-container">
+          <svg class="progress-ring" viewBox="0 0 170 170">
+            <circle class="ring-bg" cx="85" cy="85" r="72"/>
+            <circle class="ring-fill" id="ring" cx="85" cy="85" r="72"/>
+          </svg>
+          <div class="counter-inner">
+            <div id="counter">0</div>
+            <div class="counter-goal" id="goal-label">of 108</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slider-wrap">
+        <div class="slider-row">
+          <div class="field-label">Voice Sensitivity</div>
+          <div class="slider-val" id="sens-val">Medium</div>
+        </div>
+        <input type="range" id="sensitivity" min="1" max="3" value="2" step="1" oninput="onSensChange()">
+      </div>
+
+      <button class="btn" id="start-btn" onclick="toggleStart()">&#9654; START LISTENING</button>
+      <button class="btn" id="reset-btn" onclick="doReset()">&#8635; RESET</button>
+
+      <div id="status-box">
+        <span class="status-dot static"></span>
+        <span id="status-text">Ready to begin</span>
+      </div>
+      <div id="heard-box"></div>
+    </div>
+    <div class="footer-note">Requires Chrome browser &middot; Mic permission needed<br>Chant clearly &mdash; "Namah" at end triggers count</div>
+  </div>
+
+  <!-- INFO TAB -->
+  <div class="tab-panel" id="tab-info">
+    <input class="info-search" type="text" id="info-search" placeholder="Search by mukhi, deity, or benefit…" oninput="filterInfo()">
+    <div class="info-nav">
+      <button class="info-nav-btn" onclick="infoStep(-1)">&#9664; PREV</button>
+      <button class="info-nav-btn" onclick="infoStep(1)">NEXT &#9654;</button>
+    </div>
+    <div id="info-content"></div>
+  </div>
+
+  <!-- STATS TAB -->
+  <div class="tab-panel" id="tab-stats">
+    <div class="card">
+      <div class="header">
+        <div class="om" style="font-size:20px">&#10022;</div>
+        <h1>My Sadhana Stats</h1>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Chants</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-sessions">0</div><div class="stat-label">Sessions</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-malas">0</div><div class="stat-label">Malas Done</div></div>
+      </div>
+      <div class="field-label" style="margin-bottom:8px">Recent Sessions</div>
+      <div id="session-log" style="font-size:13px;color:var(--text-dim);line-height:2">No sessions yet.</div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <button class="btn" onclick="clearStats()" style="background:var(--surface2);color:var(--red);border:1px solid var(--red);font-size:11px;padding:10px;margin:0">CLEAR ALL STATS</button>
     </div>
   </div>
 
-  <div class="slider-wrap">
-    <div class="slider-row">
-      <div class="field-label">Voice Sensitivity</div>
-      <div class="slider-val" id="sens-val">Medium</div>
-    </div>
-    <input type="range" id="sensitivity" min="1" max="3" value="2" step="1">
-  </div>
-
-  <button class="btn" id="start-btn">▶ START LISTENING</button>
-  <button class="btn" id="tap-btn">◉ TAP MALA BEAD</button>
-  <button class="btn" id="reset-btn">↺ RESET</button>
-
-  <div id="status-box">
-    <span class="status-dot static"></span>
-    <span id="status-text">Ready to begin</span>
-  </div>
-  <div id="heard-box"></div>
 </div>
 
 <script>
-// ─── ERROR HANDLER ───────────────────────────────────────────
-window.onerror = function(msg) {
-  setStatus("Error: " + msg, "error");
-};
-
-// ─── MANTRAS & PHONETIC VARIANTS ─────────────────────────────
-// Each mantra has multiple phonetic spellings the browser might produce
-const mantras = [
-  {
-    label: "Om Hrim Namah",
-    variants: [
-      "om hrim namah", "om hreem namah", "om hream namah",
-      "om rim namah",  "om hrum namah",  "om him namah",
-      "om ream namah", "om green namah", "home rim nama",
-      "om hreem nama", "aum hrim namah", "om rim nama",
-      "home ream nama","om hrim namo",   "om him nama"
-    ],
-    keywords: ["om","hrim","hreem","hrum","rim","ream","namah","nama","namo"]
-  },
-  {
-    label: "Om Hrim Hoom Namah",
-    variants: [
-      "om hrim hoom namah","om hreem hoom namah","om hrim hum namah",
-      "om hrim hoom nama", "om rim hoom namah",  "om rim hum namah",
-      "home rim home nama","om hream hoom namah","om hreem hum nama",
-      "aum hrim hoom namah","om him home namah","om hrim whom namah"
-    ],
-    keywords: ["om","hrim","hreem","rim","hoom","hum","whom","home","namah","nama"]
-  },
-  {
-    label: "Om Hrim Hum Namah",
-    variants: [
-      "om hrim hum namah","om hreem hum namah","om hrim hoom namah",
-      "om rim hum namah", "home rim hum nama", "om hream hum namah",
-      "aum hrim hum namah","om him hum namah", "om hrim ham namah",
-      "om hreem ham nama", "om rim ham namah",  "om hrim home namah"
-    ],
-    keywords: ["om","hrim","hreem","rim","hum","hoom","ham","home","namah","nama"]
-  },
-  {
-    label: "Om Namah Shivaya",
-    variants: [
-      "om namah shivaya","om namo shivaya","aum namah shivaya",
-      "om nama shivaya", "om namah sivaya", "om namas shivaya",
-      "home namah shivaya","om namah shiva","om namo sivaya",
-      "om nama sivaya",  "home nama shivaya","om namah shiv"
-    ],
-    keywords: ["om","namah","namo","nama","shivaya","sivaya","shiva","shiv"]
-  },
-  {
-    label: "Om Mani Padme Hum",
-    variants: [
-      "om mani padme hum","om mani padme hoom","aum mani padme hum",
-      "om mani pad me hum","om many padme hum","om mani padme home",
-      "home mani padme hum","om mani padma hum","om mani padme ham",
-      "om money padme hum","om mani pad hum"
-    ],
-    keywords: ["om","mani","many","money","padme","padma","pad","hum","hoom","home"]
-  },
-  {
-    label: "Gayatri Mantra",
-    variants: [
-      "om bhur bhuva svah","tat savitur varenyam","bhargo devasya dhimahi",
-      "dhiyo yo nah prachodayat","om bhur bhuva swaha","tat savitur varenyam",
-      "bhargo devasya","dhiyo yo nah","prachodayat","savitur varenyam"
-    ],
-    keywords: ["bhur","bhuva","svah","swaha","savitur","varenyam","bhargo","devasya","dhimahi","dhiyo","prachodayat"]
-  }
+// ════════════════════════════════════════
+// RUDRAKSHA DATA — All 26 Mukhis + Gaurishankar
+// ════════════════════════════════════════
+const rudrakshaData = [
+  { mukhi:1,  label:"1 Mukhi",      mantra:"Om Hrim Namah",                                  hindi:"Om Hrim Namah",                             deity:"Shiva (Parameshwara)",         planet:"Sun",        benefits:["Supreme consciousness","Removes sins","Moksha","Leadership","Mental clarity"],               description:"The rarest and most powerful Rudraksha. Represents Shiva himself. Wearing it brings the wearer closest to divine consciousness and destroys sins accumulated over lifetimes. Rare to find authentic ones.",                                     keywords:["om","hrim","hreem","rim","namah","nama"] },
+  { mukhi:2,  label:"2 Mukhi",      mantra:"Om Namah",                                        hindi:"Om Namah",                                   deity:"Ardhanarishvara (Shiva-Shakti)",planet:"Moon",       benefits:["Harmony in relationships","Emotional balance","Marital bliss","Unity","Removes ego"],         description:"Represents the divine union of Shiva and Shakti. Brings harmony between partners, removes ego, and grants emotional stability. Excellent for couples and those seeking inner peace.",                                                          keywords:["om","namah","nama","namo"] },
+  { mukhi:3,  label:"3 Mukhi",      mantra:"Om Klim Namah",                                   hindi:"Om Klim Namah",                              deity:"Agni (Fire God)",              planet:"Mars",       benefits:["Burns past karma","Self-confidence","Freedom from guilt","Digestive health","Energy boost"],   description:"Ruled by Agni the fire god. Burns past karma and negative impressions. Liberates the wearer from guilt and inferiority complex. Excellent for stomach and liver issues.",                                                                      keywords:["om","klim","kleem","namah","nama"] },
+  { mukhi:4,  label:"4 Mukhi",      mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Brahma (Creator)",             planet:"Mercury",    benefits:["Intelligence","Memory","Creativity","Speech power","Students & teachers"],                    description:"Represents Brahma the creator. Enhances intelligence, memory, and creative faculties. Highly beneficial for students, researchers, teachers, and anyone in creative or communication professions.",                                             keywords:["om","hrim","hreem","rim","namah","nama"] },
+  { mukhi:5,  label:"5 Mukhi",      mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Kalagni Rudra",                planet:"Jupiter",    benefits:["General wellbeing","Health","Peace of mind","Education","Prosperity"],                        description:"The most common and widely worn Rudraksha. Ruled by Jupiter. Brings overall wellbeing, health, and peace. Suitable for everyone. Purifies the wearer and calms the mind naturally.",                                                          keywords:["om","hrim","hreem","rim","namah","nama"] },
+  { mukhi:6,  label:"6 Mukhi",      mantra:"Om Hrim Hoom Namah",                              hindi:"Om Hrim Hoom Namah",                         deity:"Kartikeya (Skanda)",           planet:"Venus",      benefits:["Willpower","Focus","Artistic abilities","Leadership","Wisdom"],                               description:"Represents Kartikeya, son of Shiva. Gives willpower, focus, and strength. Excellent for artists, managers, and those in leadership roles requiring determination and creative intelligence.",                                                  keywords:["om","hrim","hreem","rim","hoom","hum","namah","nama"] },
+  { mukhi:7,  label:"7 Mukhi",      mantra:"Om Hum Namah",                                    hindi:"Om Hum Namah",                               deity:"Saptamatrika / Mahalakshmi",   planet:"Saturn",     benefits:["Wealth attraction","Removes poverty","Business success","Financial luck","Health"],            description:"Represents the seven divine mothers and Mahalakshmi. Extremely powerful for attracting wealth and removing financial obstacles. Favored by businesspeople and those facing Saturn's malefic effects.",                                          keywords:["om","hum","hoom","home","namah","nama"] },
+  { mukhi:8,  label:"8 Mukhi",      mantra:"Om Hum Namah",                                    hindi:"Om Hum Namah",                               deity:"Ganesha",                      planet:"Rahu",       benefits:["Removes obstacles","Success in all work","Intellect","Intuition","Protection"],               description:"Represents Ganesha, remover of obstacles. Gives intelligence to overcome all hurdles. Neutralizes malefic effects of Rahu and protects from negative energies and black magic.",                                                              keywords:["om","hum","hoom","home","namah","nama"] },
+  { mukhi:9,  label:"9 Mukhi",      mantra:"Om Hrim Hum Namah",                               hindi:"Om Hrim Hum Namah",                          deity:"Durga (Navadurga)",            planet:"Ketu",       benefits:["Fearlessness","Power","Dynamic energy","Removes Ketu doshas","Protection from enemies"],      description:"Represents the nine forms of Goddess Durga. Infuses the wearer with fearlessness, power, and dynamic energy. Excellent for neutralizing Ketu's malefic influence and protection from all fears.",                                            keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"] },
+  { mukhi:10, label:"10 Mukhi",     mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Lord Vishnu",                  planet:"All Planets",benefits:["All planets pacified","Legal victories","Protection","Peace","Success"],                       description:"Represents Lord Vishnu the preserver. Pacifies all nine planets simultaneously. Provides complete protection and ensures success in legal matters and disputes of all kinds.",                                                                  keywords:["om","hrim","hreem","rim","namah","nama"] },
+  { mukhi:11, label:"11 Mukhi",     mantra:"Om Hrim Hum Namah",                               hindi:"Om Hrim Hum Namah",                          deity:"Eleven Rudras / Hanuman",      planet:"All Planets",benefits:["Adventure","Wisdom","Right decisions","Strength","Deep meditation"],                          description:"Represents the eleven Rudras. Gives wisdom to make right decisions. Blesses with Hanuman's strength and protection. Favored by meditators, travelers, and those seeking adventure in life.",                                                  keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"] },
+  { mukhi:12, label:"12 Mukhi",     mantra:"Om Krom Srom Rom Namah",                          hindi:"Om Krom Srom Rom Namah",                     deity:"Surya (Sun God)",              planet:"Sun",        benefits:["Confidence","Leadership","Administrative power","Eye health","Removes sun doshas"],           description:"Represents the twelve Adityas. Radiates solar energy, bestows confidence and leadership. Excellent for politicians, executives, and those suffering from eye or heart problems.",                                                              keywords:["om","krom","srom","rom","namah","nama"] },
+  { mukhi:13, label:"13 Mukhi",     mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Kamadeva / Indra",             planet:"Venus/Mercury",benefits:["Fulfills desires","Charisma","Attraction","Material success","Spiritual growth"],         description:"Represents Kamadeva and Indra. Fulfills worldly desires and grants charm and charisma. The wearer becomes attractive and achieves success in all endeavors, both material and spiritual.",                                                    keywords:["om","hrim","hreem","rim","namah","nama"] },
+  { mukhi:14, label:"14 Mukhi",     mantra:"Om Namah",                                        hindi:"Om Namah",                                   deity:"Deva Mani / Shiva Third Eye",  planet:"Saturn/Mars",benefits:["Intuition","Foresight","Ajna chakra","Supreme protection","Consciousness expansion"],      description:"Called Deva Mani. Among the most divine Rudrakshas after the 1 Mukhi. Opens the Ajna (third eye) chakra. Sharpens intuition to a supernatural level and provides supreme protection from all harm.",                                        keywords:["om","namah","nama","namo"] },
+  { mukhi:15, label:"15 Mukhi",     mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Pashupatinath",                planet:"Mercury",    benefits:["Lateral thinking","Abstract intellect","Hidden knowledge","Business success","Healing"],       description:"Represents Pashupatinath. Enhances lateral and abstract thinking. Beneficial for healers, doctors, and those pursuing hidden or esoteric knowledge. Brings business acumen and prosperity.",                                                  keywords:["om","hrim","hreem","rim","namah","nama"] },
+  { mukhi:16, label:"16 Mukhi",     mantra:"Om Hrim Hum Namah",                               hindi:"Om Hrim Hum Namah",                          deity:"Mahamrityunjaya Shiva",        planet:"Moon",       benefits:["Victory over death","Fear removal","Protection","Long life","Health recovery"],               description:"Represents Shiva's victory over death. Provides fearlessness and protection from untimely death, accidents, and disease. Amplifies the Mahamrityunjaya mantra effect when chanted regularly.",                                               keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"] },
+  { mukhi:17, label:"17 Mukhi",     mantra:"Om Hrim Hum Hum Namah",                           hindi:"Om Hrim Hum Hum Namah",                      deity:"Vishwakarma / Katyayani",      planet:"Saturn",     benefits:["Sudden wealth","Land & property","Manifestation","Material gains","Saturn Sadesati relief"],  description:"Represents Vishwakarma (divine architect) and Katyayani. Attracts sudden and unexpected wealth, land, and property. Very powerful for Saturn Sadesati. Helps manifest material desires rapidly.",                                             keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"] },
+  { mukhi:18, label:"18 Mukhi",     mantra:"Om Hrim Hum Ekatva Rupe Hum Hrim Om",             hindi:"Om Hrim Hum Ekatva Rupe Hum Hrim Om",        deity:"Bhumi Devi (Earth Goddess)",   planet:"Earth",      benefits:["Grounding","Real estate success","Fertility","Mother health","Stability"],                     description:"Represents Bhumi Devi, the Earth goddess. Beneficial for pregnant women and maternal health. Brings grounding, stability, and extraordinary success in real estate and land dealings.",                                                       keywords:["om","hrim","hreem","hum","hoom","ekatva","rupe","namah","nama"] },
+  { mukhi:19, label:"19 Mukhi",     mantra:"Om Namoh Bhagwate Vashu Devaya Namah",            hindi:"Om Namoh Bhagwate Vashu Devaya Namah",       deity:"Lord Vishnu (Narayana)",       planet:"Mercury",    benefits:["Unlimited wealth","All desires fulfilled","Business growth","Protection","Spiritual progress"], description:"Represents Lord Vishnu in his complete form. One of the rarest beads for material prosperity. Fulfills all legitimate desires and provides Vishnu's complete divine protection and grace.",                                                   keywords:["om","namoh","namo","bhagwate","vashu","devaya","namah","nama"] },
+  { mukhi:20, label:"20 Mukhi",     mantra:"Om Hrim Hrim Hum Hum Brahmane Namah",             hindi:"Om Hrim Hrim Hum Hum Brahmane Namah",        deity:"Brahma (Trimurti)",            planet:"All Planets",benefits:["Creation power","All-round success","Wisdom","Divine protection","Moksha path"],            description:"Represents Brahma in his most expansive form. Extremely rare. Gives cosmic creative power and all-round success across every domain of life. Provides divine protection from all directions.",                                                keys:["om","hrim","hreem","hum","hoom","brahmane","namah","nama"],                                                                                                                                                                                                                        keywords:["om","hrim","hreem","hum","hoom","brahmane","namah","nama"] },
+  { mukhi:21, label:"21 Mukhi",     mantra:"Om Hreem Hoom Shivaya Namah",                     hindi:"Om Hreem Hoom Shivaya Namah",                deity:"Kubera / Shiva",               planet:"All Planets",benefits:["Supreme wealth","Power","Status","All planets pacified","Kubera blessings"],               description:"Considered the king of Rudrakshas for wealth. Represents Kubera, lord of wealth. Pacifies all planets and opens all doors of prosperity. Historically worn by maharajas, saints, and great sages.",                                          keywords:["om","hreem","hrim","hoom","hum","shivaya","namah","nama"] },
+  { mukhi:22, label:"22 Mukhi",     mantra:"Om Hreem Hum Namah",                              hindi:"Om Hreem Hum Namah",                         deity:"Brahma (Subtle form)",         planet:"All Planets",benefits:["Deep meditation","Cosmic awareness","Removes deep ego","Spiritual clarity","Liberation"],    description:"One of the rarest Rudrakshas. Connects with Brahma's subtle creative intelligence. Removes deep-rooted ego and brings cosmic awareness. Ideal for advanced spiritual seekers on the path of liberation.",                                    keywords:["om","hreem","hrim","hum","hoom","namah","nama"] },
+  { mukhi:23, label:"23 Mukhi",     mantra:"Om Namo Bhagwatey Vishnu Devaya Namah",           hindi:"Om Namo Bhagwatey Vishnu Devaya Namah",      deity:"Shiva-Vishnu combined",        planet:"All Planets",benefits:["Ultimate success","Harmony","Fame","Longevity","Combined divine grace"],                   description:"An extraordinarily rare bead combining energies of both Shiva and Vishnu. Brings ultimate success, harmony, and the combined divine grace of the two supreme deities in Hindu tradition.",                                                    keywords:["om","namo","bhagwatey","vishnu","devaya","namah","nama"] },
+  { mukhi:24, label:"24 Mukhi",     mantra:"Om Krom Shrom Rom Namah",                         hindi:"Om Krom Shrom Rom Namah",                    deity:"Brahma (Ultimate Creator)",    planet:"Sun",        benefits:["Ultimate creation power","Divine authority","Cosmic wisdom","Supreme protection","All success"], description:"Among the rarest Rudrakshas. Represents Brahma's ultimate creative authority. Gives cosmic wisdom and supreme protection. Very few authentic beads exist worldwide — treat with great reverence.",                                          keywords:["om","krom","shrom","rom","namah","nama"] },
+  { mukhi:25, label:"25 Mukhi",     mantra:"Om Hreem Shreem Vam Tripura Sundari Devyai Namah",hindi:"Om Hreem Shreem Vam Tripura Sundari Devyai Namah",deity:"Tripura Sundari (Devi)",  planet:"All Planets",benefits:["Divine feminine power","Beauty","Supreme Shakti","Cosmic wisdom","Moksha"],               description:"Extremely rare. Represents Tripura Sundari, the most beautiful and supreme form of Goddess. Awakens divine feminine energy. Said to grant liberation (Moksha) directly to the wearer over time.",                                            keywords:["om","hreem","hrim","shreem","shrim","vam","tripura","sundari","devyai","namah","nama"] },
+  { mukhi:"G",label:"Gaurishankar", mantra:"Om Gauri Shankaray Namaha",                       hindi:"Om Gauri Shankaray Namaha",                  deity:"Shiva & Parvati (Union)",      planet:"Moon",       benefits:["Marital harmony","Love","Family peace","Soul unity","Spiritual partnership"],                   description:"Two naturally joined Rudrakshas representing the divine union of Shiva and Parvati. The most powerful bead for marital harmony and love. Brings unity, peace, and divine love into all relationships.", keywords:["om","gauri","gowri","shankaray","shankar","namaha","namah","nama"] }
 ];
 
-// ─── STATE ───────────────────────────────────────────────────
-let count = 0;
-let isRunning = false;
-let recognition = null;
-let audioCtx = null;
-let sensitivity = 2; // 1=strict, 2=medium, 3=loose
-let cooldown = false; // prevent double-count
-const CIRCUMFERENCE = 2 * Math.PI * 80; // ~502.65
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+let count = 0, isRunning = false, recognition = null, audioCtx = null;
+let sensitivity = 2, cooldown = false, detectionMode = 'namah';
+let currentInfoIdx = 0, filteredInfo = [...rudrakshaData];
+let stats = loadStats();
+const CIRCUMFERENCE = 2 * Math.PI * 72;
 
-// ─── POPULATE DROPDOWN ───────────────────────────────────────
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
 const mantraSelect = document.getElementById('mantra-select');
-mantras.forEach((m, i) => {
-  let opt = document.createElement('option');
+rudrakshaData.forEach((r, i) => {
+  const opt = document.createElement('option');
   opt.value = i;
-  opt.textContent = m.label;
+  opt.textContent = r.label + ' — ' + r.mantra;
   mantraSelect.appendChild(opt);
 });
+document.getElementById('ring').style.strokeDasharray = CIRCUMFERENCE;
+document.getElementById('ring').style.strokeDashoffset = CIRCUMFERENCE;
+onMantraChange();
 
-// ─── SENSITIVITY SLIDER ──────────────────────────────────────
-const sensitivitySlider = document.getElementById('sensitivity');
-const sensVal = document.getElementById('sens-val');
-const labels = {1: "Strict", 2: "Medium", 3: "Loose"};
-sensitivitySlider.oninput = function() {
-  sensitivity = parseInt(this.value);
-  sensVal.textContent = labels[sensitivity];
-};
+// ════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'info') renderInfo();
+  if (name === 'stats') renderStats();
+}
 
-// ─── SPEECH RECOGNITION SETUP ────────────────────────────────
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+// ════════════════════════════════════════
+// MANTRA
+// ════════════════════════════════════════
+function onMantraChange() {
+  const r = getCurrentRudraksha();
+  document.getElementById('mantra-text').textContent = r.mantra;
+  document.getElementById('mantra-hindi').textContent = r.hindi;
+}
+function getCurrentRudraksha() { return rudrakshaData[parseInt(mantraSelect.value)]; }
 
-if (SpeechRecognition) {
-  recognition = new SpeechRecognition();
+function setMode(mode) {
+  detectionMode = mode;
+  document.getElementById('mode-namah').classList.toggle('active', mode === 'namah');
+  document.getElementById('mode-full').classList.toggle('active', mode === 'full');
+}
+
+function onSensChange() {
+  sensitivity = parseInt(document.getElementById('sensitivity').value);
+  document.getElementById('sens-val').textContent = {1:"Strict",2:"Medium",3:"Loose"}[sensitivity];
+}
+
+function onTargetChange() {
+  const goal = parseInt(document.getElementById('target-select').value);
+  document.getElementById('goal-label').textContent = 'of ' + goal;
+  updateRing(count, goal);
+}
+
+// ════════════════════════════════════════
+// SPEECH RECOGNITION
+// ════════════════════════════════════════
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SR) {
+  recognition = new SR();
   recognition.continuous = true;
   recognition.interimResults = true;
-  // Try en-US: browsers often transcribe Sanskrit more consistently
-  // through English phonetics than Hindi
   recognition.lang = 'en-US';
-
-  recognition.onresult = function(event) {
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const result = event.results[i];
-      const text = result[0].transcript.toLowerCase().trim();
-
-      if (result.isFinal) {
-        document.getElementById('heard-box').textContent = '🎤 Heard: "' + text + '"';
-        checkMatch(text, true);
-      } else {
-        // Also check interim — useful for long mantras
-        document.getElementById('heard-box').textContent = '🎤 "' + text + '"';
-        checkMatch(text, false);
-      }
+  recognition.onresult = function(e) {
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const text = e.results[i][0].transcript.toLowerCase().trim();
+      document.getElementById('heard-box').textContent = '"' + text + '"';
+      if (detectionMode === 'namah') checkNamahOnly(text, e.results[i].isFinal);
+      else checkFullMantra(text, e.results[i].isFinal);
     }
   };
-
   recognition.onend = function() {
-    if (isRunning) {
-      setTimeout(() => { try { recognition.start(); } catch(e){} }, 300);
-    }
+    if (isRunning) setTimeout(() => { try { recognition.start(); } catch(e2){} }, 300);
   };
-
   recognition.onerror = function(e) {
-    if (e.error === 'no-speech') return; // ignore silence
+    if (e.error === 'no-speech') return;
     setStatus("Mic error: " + e.error, "error");
   };
-
 } else {
-  setStatus("Voice not supported — use Chrome on Android/Desktop", "error");
+  setStatus("Voice not supported — use Chrome on Android or Desktop", "error");
   document.getElementById('start-btn').disabled = true;
 }
 
-// ─── PHONETIC NORMALIZATION ───────────────────────────────────
-function normalize(text) {
-  return text
-    // Common Sanskrit phoneme misreadings
-    .replace(/\boh?m\b/g, "om")
-    .replace(/\baum\b/g, "om")
-    .replace(/\bh?ree+m\b/g, "hrim")
-    .replace(/\bh?rim\b/g, "hrim")
-    .replace(/\bhrum\b/g, "hrim")
-    .replace(/\bgreen\b/g, "hrim")    // very common mishear!
-    .replace(/\bdream\b/g, "hrim")
-    .replace(/\bcream\b/g, "hrim")
-    .replace(/\bream\b/g, "hrim")
-    .replace(/\bhoo+m\b/g, "hum")
-    .replace(/\bwhom\b/g, "hum")
-    .replace(/\bwomb\b/g, "hum")
-    .replace(/\bhome\b/g, "hum")      // "hum" often heard as "home"
-    .replace(/\bham\b/g, "hum")
-    .replace(/\bnam[ao]h?\b/g, "namah")
-    .replace(/\bnamo\b/g, "namah")
-    .replace(/\bsiv[ao]y[ao]\b/g, "shivaya")
-    .replace(/\bshiv[ao]?\b/g, "shivaya")
-    .replace(/\bmany\b/g, "mani")
-    .replace(/\bmoney\b/g, "mani")
-    .replace(/\bpadm[ao]\b/g, "padme")
-    .replace(/\bswah[ao]\b/g, "svah")
-    .replace(/\bsav[iy]t[uo]r\b/g, "savitur");
-}
+// ════════════════════════════════════════
+// NAMAH-ONLY DETECTION
+// Your insight: all mantras end in "Namah",
+// so detecting it = one complete chant.
+// We also require an Om/seed sound first to
+// prevent false triggers from normal speech.
+// ════════════════════════════════════════
+const NAMAH_RE = /\bnam[ao]h?[ao]?\b|\bnam[ao]\b|\bnamas\b/;
+const OM_RE    = /\b(oh?m|aum|home|hom|hri+m|hree+m|hreem|rim|ream|green|cream|hu+m|hoo+m|whom|klim|kleem|krom|srom|rom|gauri|gowri|shankar|bhagwate|vishnu|devaya|tripura|sundari)\b/;
 
-// ─── MATCH LOGIC ─────────────────────────────────────────────
-function checkMatch(rawText, isFinal) {
+let recentWindow = '', windowTimer = null;
+
+function checkNamahOnly(text, isFinal) {
   if (cooldown) return;
+  recentWindow = (recentWindow + ' ' + text).slice(-150);
+  clearTimeout(windowTimer);
+  windowTimer = setTimeout(() => { recentWindow = ''; }, 5000);
 
-  const mantraIdx = parseInt(mantraSelect.value);
-  const mantra = mantras[mantraIdx];
-  const normalized = normalize(rawText);
+  const hasNameh = NAMAH_RE.test(recentWindow);
+  if (!hasNameh) return;
 
-  // 1. Exact variant match (most reliable)
-  for (const variant of mantra.variants) {
-    const normVariant = normalize(variant);
-    if (normalized.includes(normVariant) || normVariant.includes(normalized)) {
-      if (isFinal) triggerCount("✦ Exact match");
-      return;
-    }
-  }
+  const hasOm = OM_RE.test(recentWindow);
+  // Strict & Medium: require an Om/seed sound. Loose: namah alone counts.
+  if (sensitivity < 3 && !hasOm) return;
 
-  // 2. Keyword scoring (fuzzy)
-  const keywords = mantra.keywords;
-  let matched = keywords.filter(k => normalized.includes(k));
-  let score = matched.length;
-
-  // Thresholds per sensitivity level
-  const threshold = sensitivity === 1 ? Math.ceil(keywords.length * 0.6)
-                  : sensitivity === 2 ? Math.ceil(keywords.length * 0.4)
-                  :                     2; // loose: any 2 keywords
-
-  if (score >= threshold && isFinal) {
-    triggerCount("◈ Keyword match (" + matched.join(", ") + ")");
+  if (isFinal) {
+    triggerCount("Namah detected");
+    recentWindow = '';
   }
 }
 
-// ─── TRIGGER COUNT ───────────────────────────────────────────
+// ════════════════════════════════════════
+// FULL MANTRA DETECTION
+// ════════════════════════════════════════
+function normalize(t) {
+  return t
+    .replace(/\boh?m\b/g,"om").replace(/\baum\b/g,"om")
+    .replace(/\bh?ree+m\b/g,"hrim").replace(/\bh?rim\b/g,"hrim").replace(/\bhrum\b/g,"hrim")
+    .replace(/\bgreen\b/g,"hrim").replace(/\bdream\b/g,"hrim").replace(/\bcream\b/g,"hrim").replace(/\bream\b/g,"hrim")
+    .replace(/\bhoo+m\b/g,"hum").replace(/\bwhom\b/g,"hum").replace(/\bwomb\b/g,"hum").replace(/\bhome\b/g,"hum").replace(/\bham\b/g,"hum")
+    .replace(/\bnam[ao]h?\b/g,"namah").replace(/\bnamo\b/g,"namah")
+    .replace(/\bkleem\b/g,"klim").replace(/\bshrom\b/g,"srom");
+}
+
+function checkFullMantra(rawText, isFinal) {
+  if (cooldown || !isFinal) return;
+  const r = getCurrentRudraksha();
+  const n = normalize(rawText);
+  const matched = r.keywords.filter(k => n.includes(k));
+  const threshold = sensitivity === 1 ? Math.ceil(r.keywords.length * 0.6)
+                  : sensitivity === 2 ? Math.ceil(r.keywords.length * 0.4) : 2;
+  if (matched.length >= threshold) triggerCount("Full match: " + matched.join(', '));
+}
+
+// ════════════════════════════════════════
+// COUNT & UI
+// ════════════════════════════════════════
 function triggerCount(reason) {
   if (cooldown) return;
   cooldown = true;
-  setTimeout(() => cooldown = false, 800); // 800ms debounce
+  setTimeout(() => cooldown = false, 900);
 
   count++;
   const goal = parseInt(document.getElementById('target-select').value);
-
   document.getElementById('counter').textContent = count;
   pulseCounter();
   updateRing(count, goal);
   playBeep(count === goal);
-  vibrate(count === goal ? 300 : 50);
+  vibrate(count === goal ? 400 : 40);
 
   if (count >= goal) {
+    saveSession(goal);
     stopApp();
-    setStatus("🌟 Completed! " + goal + " mantras chanted.", "done");
+    setStatus("Completed! " + goal + " mantras. Jai Shiva!", "done");
     document.getElementById('heard-box').textContent = '';
   } else {
-    setStatus(reason || "Counted", "matched");
+    setStatus(reason, "matched");
   }
 }
 
-// ─── PROGRESS RING ────────────────────────────────────────────
 function updateRing(current, goal) {
   const pct = Math.min(current / goal, 1);
-  const offset = CIRCUMFERENCE * (1 - pct);
   const ring = document.getElementById('ring');
-  ring.style.strokeDashoffset = offset;
-  // Color shift gold → green as you approach goal
-  if (pct > 0.9) ring.style.stroke = '#40c080';
-  else if (pct > 0.6) ring.style.stroke = '#c0a040';
-  else ring.style.stroke = '#c9a84c';
+  ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
+  ring.style.stroke = pct > 0.9 ? '#40c080' : pct > 0.6 ? '#c0a040' : '#c9a84c';
 }
 
 function pulseCounter() {
   const el = document.getElementById('counter');
   el.classList.add('pulse');
-  setTimeout(() => el.classList.remove('pulse'), 150);
+  setTimeout(() => el.classList.remove('pulse'), 160);
 }
 
-// ─── SOUND ───────────────────────────────────────────────────
 function playBeep(isComplete) {
   if (!audioCtx) return;
   try {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
     if (isComplete) {
-      // Triumphant chord on completion
-      [523, 659, 784].forEach((freq, i) => {
-        const o2 = audioCtx.createOscillator();
-        const g2 = audioCtx.createGain();
-        o2.connect(g2); g2.connect(audioCtx.destination);
-        o2.frequency.value = freq;
-        o2.type = 'sine';
-        g2.gain.setValueAtTime(0.15, audioCtx.currentTime + i * 0.08);
-        g2.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + i * 0.08 + 0.8);
-        o2.start(audioCtx.currentTime + i * 0.08);
-        o2.stop(audioCtx.currentTime + i * 0.08 + 0.8);
+      [523,659,784,1046].forEach((freq, i) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.value = freq; o.type = 'sine';
+        g.gain.setValueAtTime(0.18, audioCtx.currentTime + i*0.1);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + i*0.1 + 1.0);
+        o.start(audioCtx.currentTime + i*0.1);
+        o.stop(audioCtx.currentTime + i*0.1 + 1.0);
       });
     } else {
-      // Soft bell tone on each count
-      osc.type = 'sine';
-      osc.frequency.value = 740;
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.25);
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type = 'sine'; o.frequency.value = 720;
+      g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
+      o.start(); o.stop(audioCtx.currentTime + 0.2);
     }
   } catch(e) {}
 }
 
-// ─── VIBRATION ───────────────────────────────────────────────
-function vibrate(duration) {
-  if (navigator.vibrate) navigator.vibrate(duration);
-}
+function vibrate(d) { if (navigator.vibrate) navigator.vibrate(d); }
 
-// ─── STATUS BOX ──────────────────────────────────────────────
 function setStatus(msg, type) {
   const box = document.getElementById('status-box');
   const dot = box.querySelector('.status-dot');
-  const text = document.getElementById('status-text');
-  box.className = type ? 'listening' === type || 'matched' === type ? '' : '' : '';
-  box.classList.add(type || '');
+  box.className = type || '';
   dot.className = 'status-dot' + (type === 'listening' ? '' : ' static');
-  text.textContent = msg;
+  document.getElementById('status-text').textContent = msg;
 }
 
-// ─── BUTTONS ─────────────────────────────────────────────────
-document.getElementById('start-btn').onclick = async function() {
+// ════════════════════════════════════════
+// BUTTON HANDLERS
+// ════════════════════════════════════════
+async function toggleStart() {
   if (!isRunning) {
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') await audioCtx.resume();
       await navigator.mediaDevices.getUserMedia({ audio: true });
-
       isRunning = true;
       if (recognition) recognition.start();
-
-      this.textContent = '■ STOP';
-      this.classList.add('stop');
-      setStatus("Listening — chant your mantra...", "listening");
-
+      const btn = document.getElementById('start-btn');
+      btn.textContent = 'STOP';
+      btn.classList.add('stop');
+      setStatus("Listening — chant your mantra…", "listening");
     } catch(e) {
       setStatus("Microphone permission denied", "error");
     }
   } else {
     stopApp();
+    setStatus("Stopped", "");
   }
-};
+}
 
-document.getElementById('tap-btn').onclick = function() {
-  if (!isRunning) { setStatus("Press START first", "error"); return; }
-  triggerCount("◉ Manual tap");
-};
-
-document.getElementById('reset-btn').onclick = function() {
+function doReset() {
   stopApp();
-  count = 0;
+  count = 0; recentWindow = '';
   document.getElementById('counter').textContent = '0';
-  document.getElementById('ring').style.strokeDashoffset = CIRCUMFERENCE;
-  document.getElementById('ring').style.stroke = '#c9a84c';
+  const ring = document.getElementById('ring');
+  ring.style.strokeDashoffset = CIRCUMFERENCE;
+  ring.style.stroke = '#c9a84c';
   document.getElementById('heard-box').textContent = '';
   setStatus("Reset — ready to begin", "");
-};
-
-document.getElementById('target-select').onchange = function() {
-  document.getElementById('goal-label').textContent = 'of ' + this.value;
-  updateRing(count, parseInt(this.value));
-};
+}
 
 function stopApp() {
   isRunning = false;
   if (recognition) try { recognition.stop(); } catch(e) {}
   const btn = document.getElementById('start-btn');
-  btn.textContent = '▶ START LISTENING';
+  btn.textContent = 'START LISTENING';
   btn.classList.remove('stop');
 }
 
-// Init ring
-document.getElementById('ring').style.strokeDasharray = CIRCUMFERENCE;
-document.getElementById('ring').style.strokeDashoffset = CIRCUMFERENCE;
+// ════════════════════════════════════════
+// INFO TAB
+// ════════════════════════════════════════
+function renderInfo() {
+  if (!filteredInfo.length) {
+    document.getElementById('info-content').innerHTML = '<div class="info-card" style="text-align:center;color:var(--text-dim);padding:40px">No results found</div>';
+    return;
+  }
+  const r = filteredInfo[currentInfoIdx];
+  document.getElementById('info-content').innerHTML = `
+    <div class="info-card">
+      <div class="mukhi-badge">
+        <span class="num">${r.mukhi}</span>
+        <span class="label">MUKHI</span>
+      </div>
+      <div class="info-mantra-line">${r.mantra}</div>
+      <div class="info-deity">Deity: ${r.deity} &nbsp;&middot;&nbsp; Planet: ${r.planet}</div>
+      <div class="info-section-label">Sanskrit Mantra</div>
+      <div class="info-text" style="color:var(--gold);font-size:16px">${r.hindi}</div>
+      <div class="info-section-label">About this Rudraksha</div>
+      <div class="info-text">${r.description}</div>
+      <div class="info-section-label">Key Benefits</div>
+      <div class="benefit-tags">${r.benefits.map(b => `<span class="tag">${b}</span>`).join('')}</div>
+      <div style="margin-top:14px">
+        <button class="btn" onclick="selectAndCounter(${rudrakshaData.indexOf(r)})"
+          style="background:linear-gradient(135deg,var(--gold),var(--amber));color:#1a0e00;margin:0;padding:10px;font-size:11px">
+          USE THIS MANTRA IN COUNTER
+        </button>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--text-dim);margin-top:4px">
+      ${currentInfoIdx+1} of ${filteredInfo.length}
+    </div>
+  `;
+}
+
+function infoStep(dir) {
+  currentInfoIdx = (currentInfoIdx + dir + filteredInfo.length) % filteredInfo.length;
+  renderInfo();
+}
+
+function filterInfo() {
+  const q = document.getElementById('info-search').value.toLowerCase();
+  filteredInfo = rudrakshaData.filter(r =>
+    r.label.toLowerCase().includes(q) || r.deity.toLowerCase().includes(q) ||
+    r.mantra.toLowerCase().includes(q) || r.benefits.some(b => b.toLowerCase().includes(q))
+  );
+  currentInfoIdx = 0;
+  renderInfo();
+}
+
+function selectAndCounter(idx) {
+  mantraSelect.value = idx;
+  onMantraChange();
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-counter').classList.add('active');
+  document.querySelector('.tab-btn').classList.add('active');
+}
+
+// ════════════════════════════════════════
+// STATS
+// ════════════════════════════════════════
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem('mantra_stats') || '{"total":0,"sessions":[],"malas":0}'); }
+  catch(e) { return { total:0, sessions:[], malas:0 }; }
+}
+
+function saveSession(goal) {
+  const r = getCurrentRudraksha();
+  stats.total += goal;
+  if (goal >= 108) stats.malas++;
+  stats.sessions.unshift({ mantra: r.label + ' — ' + r.mantra, count: goal, date: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) });
+  stats.sessions = stats.sessions.slice(0, 20);
+  localStorage.setItem('mantra_stats', JSON.stringify(stats));
+}
+
+function renderStats() {
+  document.getElementById('stat-total').textContent = stats.total.toLocaleString();
+  document.getElementById('stat-sessions').textContent = stats.sessions.length;
+  document.getElementById('stat-malas').textContent = stats.malas;
+  const log = document.getElementById('session-log');
+  if (!stats.sessions.length) {
+    log.innerHTML = '<span style="color:var(--text-dim);font-style:italic">No sessions yet. Start chanting!</span>';
+  } else {
+    log.innerHTML = stats.sessions.map(s =>
+      `<div style="border-bottom:1px solid var(--border);padding:6px 0">
+        <span style="color:var(--gold)">${s.count}&times;</span> ${s.mantra}
+        <span style="float:right;font-size:11px;color:var(--text-dim)">${s.date}</span>
+      </div>`
+    ).join('');
+  }
+}
+
+function clearStats() {
+  if (confirm('Clear all stats? This cannot be undone.')) {
+    stats = { total:0, sessions:[], malas:0 };
+    localStorage.setItem('mantra_stats', JSON.stringify(stats));
+    renderStats();
+  }
+}
+
+renderInfo();
+window.onerror = function(msg) { setStatus("Error: " + msg, "error"); };
 </script>
 </body>
 </html>
