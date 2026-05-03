@@ -3,739 +3,929 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Rudraksha Mantra Counter — ॐ</title>
+<title>RudraMala — Mantra Counter</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --gold: #c9a84c; --gold-light: #f0d080; --gold-dim: #7a6030;
-    --amber: #e08030; --bg: #080604; --surface: #100e0a;
-    --surface2: #1a1710; --surface3: #221f14;
-    --border: #2a2418; --border2: #3a3020;
-    --text: #e8dcc8; --text-dim: #7a7060;
-    --green: #40c080; --red: #c04040;
-  }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Crimson Text', Georgia, serif;
-    background: var(--bg); color: var(--text);
-    min-height: 100vh; padding: 16px 16px 40px; overflow-x: hidden;
-  }
-  body::before {
-    content: ''; position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 60% at 80% 80%, rgba(224,128,48,0.04) 0%, transparent 60%);
-    pointer-events: none; z-index: 0;
-  }
-  .page { position: relative; z-index: 1; max-width: 460px; margin: 0 auto; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold:#c9a84c; --gold-light:#f0d080; --gold-dim:#7a6030;
+  --amber:#e08030; --bg:#080604; --surface:#100e0a;
+  --surface2:#1a1710; --surface3:#221f14;
+  --border:#2a2418; --border2:#3a3020;
+  --text:#e8dcc8; --text-dim:#7a7060;
+  --green:#40c080; --red:#c04040; --purple:#9060c0;
+}
+body {
+  font-family:'Crimson Text',Georgia,serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; padding:12px 12px 60px; overflow-x:hidden;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(201,168,76,.07) 0%,transparent 70%),
+             radial-gradient(ellipse 40% 60% at 80% 80%,rgba(224,128,48,.04) 0%,transparent 60%);
+  pointer-events:none; z-index:0;
+}
+.page { position:relative; z-index:1; max-width:460px; margin:0 auto; }
 
-  /* TABS */
-  .tabs {
-    display: flex; gap: 6px; margin-bottom: 16px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; padding: 5px;
-  }
-  .tab-btn {
-    flex: 1; padding: 10px 4px; border: none; border-radius: 10px;
-    background: transparent; color: var(--text-dim);
-    font-family: 'Cinzel', serif; font-size: 9px;
-    letter-spacing: 0.12em; cursor: pointer; transition: all 0.2s;
-  }
-  .tab-btn.active { background: linear-gradient(135deg, var(--gold), var(--amber)); color: #1a0e00; }
+/* ── APP HEADER ── */
+.app-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 4px 14px;
+}
+.app-name { font-family:'Cinzel',serif; font-size:16px; color:var(--gold); letter-spacing:0.2em; }
+.app-tagline { font-size:10px; color:var(--text-dim); letter-spacing:0.15em; }
+.premium-badge {
+  background:linear-gradient(135deg,#7040a0,#4020608);
+  border:1px solid #9060c0; border-radius:20px; padding:5px 12px;
+  font-family:'Cinzel',serif; font-size:9px; color:#d0a0ff;
+  letter-spacing:0.15em; cursor:pointer; transition:all .2s;
+}
+.premium-badge:hover { transform:scale(1.04); box-shadow:0 0 12px rgba(144,96,192,.4); }
+.premium-badge.active { background:linear-gradient(135deg,var(--gold),var(--amber)); color:#1a0e00; border-color:var(--gold); }
 
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position:fixed; bottom:0; left:0; right:0; z-index:100;
+  display:flex; background:rgba(10,8,4,.95);
+  border-top:1px solid var(--border); backdrop-filter:blur(10px);
+  padding:6px 0 env(safe-area-inset-bottom,0);
+}
+.nav-btn {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  padding:6px 4px; border:none; background:transparent;
+  color:var(--text-dim); font-family:'Cinzel',serif;
+  font-size:8px; letter-spacing:0.1em; cursor:pointer; transition:all .2s;
+  gap:3px;
+}
+.nav-btn .nav-icon { font-size:18px; line-height:1; }
+.nav-btn.active { color:var(--gold); }
+.nav-btn.active .nav-icon { filter:drop-shadow(0 0 4px rgba(201,168,76,.6)); }
 
-  /* CARD */
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 24px; padding: 24px 20px; position: relative;
-    box-shadow: 0 0 60px rgba(201,168,76,0.06), 0 20px 40px rgba(0,0,0,0.6);
-    margin-bottom: 14px;
-  }
-  .card::before {
-    content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
 
-  /* HEADER */
-  .header { text-align: center; margin-bottom: 20px; }
-  .header .om {
-    font-family: 'Cinzel', serif; font-size: 26px; color: var(--gold);
-    text-shadow: 0 0 20px rgba(201,168,76,0.4); margin-bottom: 2px;
-  }
-  .header h1 {
-    font-family: 'Cinzel', serif; font-size: 11px; font-weight: 400;
-    letter-spacing: 0.4em; color: var(--text-dim); text-transform: uppercase;
-  }
+/* ── CARD ── */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; padding:20px 18px; position:relative;
+  box-shadow:0 0 40px rgba(201,168,76,.05),0 16px 32px rgba(0,0,0,.5);
+  margin-bottom:12px;
+}
+.card::before {
+  content:''; position:absolute; top:0; left:20%; right:20%; height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.card.locked { opacity:.7; pointer-events:none; }
+.locked-overlay {
+  position:absolute; inset:0; border-radius:20px;
+  background:rgba(8,6,4,.7); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:8px; z-index:10;
+  pointer-events:all;
+}
+.lock-icon { font-size:32px; }
+.lock-text { font-family:'Cinzel',serif; font-size:11px; color:var(--gold); letter-spacing:0.2em; }
+.lock-sub { font-size:12px; color:var(--text-dim); font-style:italic; }
+.unlock-btn {
+  background:linear-gradient(135deg,#7040a0,#402060);
+  border:1px solid #9060c0; border-radius:10px;
+  padding:8px 20px; color:#d0a0ff; font-family:'Cinzel',serif;
+  font-size:10px; letter-spacing:0.15em; cursor:pointer; margin-top:4px;
+}
 
-  /* FIELDS */
-  .field { margin-bottom: 12px; }
-  .field-label {
-    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
-    color: var(--text-dim); margin-bottom: 5px;
-  }
-  select {
-    width: 100%; padding: 11px 14px; border-radius: 10px; font-size: 14px;
-    font-family: 'Crimson Text', serif; background: var(--surface2);
-    color: var(--text); border: 1px solid var(--border); appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7060' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 14px center; cursor: pointer;
-  }
-  select:focus { outline: none; border-color: var(--gold-dim); }
+/* ── HEADER ── */
+.header { text-align:center; margin-bottom:16px; }
+.header .om { font-family:'Cinzel',serif; font-size:24px; color:var(--gold); text-shadow:0 0 20px rgba(201,168,76,.4); margin-bottom:2px; }
+.header h2 { font-family:'Cinzel',serif; font-size:10px; font-weight:400; letter-spacing:.4em; color:var(--text-dim); text-transform:uppercase; }
 
-  /* MANTRA DISPLAY */
-  .mantra-display {
-    background: var(--surface2); border: 1px solid var(--border2);
-    border-radius: 10px; padding: 10px 14px; text-align: center; margin-bottom: 12px;
-  }
-  .mantra-sanskrit { font-size: 17px; color: var(--gold-light); letter-spacing: 0.04em; margin-bottom: 3px; }
-  .mantra-hindi { font-size: 14px; color: var(--text-dim); font-style: italic; }
+/* ── FIELDS ── */
+.field { margin-bottom:11px; }
+.field-label { font-size:10px; letter-spacing:.25em; text-transform:uppercase; color:var(--text-dim); margin-bottom:5px; }
+select {
+  width:100%; padding:10px 14px; border-radius:10px; font-size:14px;
+  font-family:'Crimson Text',serif; background:var(--surface2);
+  color:var(--text); border:1px solid var(--border); appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7060' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center; cursor:pointer;
+}
+select:focus { outline:none; border-color:var(--gold-dim); }
 
-  /* DIVIDER */
-  .divider { display: flex; align-items: center; gap: 10px; margin: 12px 0; color: var(--gold-dim); font-size: 10px; }
-  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+/* ── MANTRA DISPLAY ── */
+.mantra-display {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:10px; padding:10px 14px; text-align:center; margin-bottom:11px;
+}
+.mantra-en { font-size:16px; color:var(--gold-light); margin-bottom:3px; }
+.mantra-hi { font-size:15px; color:var(--text-dim); }
 
-  /* RING */
-  .counter-wrap { display: flex; flex-direction: column; align-items: center; margin: 14px 0; }
-  .ring-container { position: relative; width: 170px; height: 170px; }
-  .progress-ring { transform: rotate(-90deg); width: 170px; height: 170px; }
-  .ring-bg { fill: none; stroke: var(--border); stroke-width: 7; }
-  .ring-fill {
-    fill: none; stroke: var(--gold); stroke-width: 7; stroke-linecap: round;
-    stroke-dasharray: 452.39; stroke-dashoffset: 452.39;
-    transition: stroke-dashoffset 0.4s ease, stroke 0.3s;
-    filter: drop-shadow(0 0 6px rgba(201,168,76,0.5));
-  }
-  .counter-inner {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-  }
-  #counter {
-    font-family: 'Cinzel', serif; font-size: 58px; font-weight: 900;
-    color: var(--gold-light); line-height: 1;
-    text-shadow: 0 0 30px rgba(201,168,76,0.4); transition: transform 0.1s;
-  }
-  #counter.pulse { transform: scale(1.1); }
-  .counter-goal { font-size: 11px; color: var(--text-dim); letter-spacing: 0.15em; margin-top: 2px; }
+/* ── RING ── */
+.counter-wrap { display:flex; flex-direction:column; align-items:center; margin:12px 0; }
+.ring-container { position:relative; width:160px; height:160px; }
+.progress-ring { transform:rotate(-90deg); width:160px; height:160px; }
+.ring-bg { fill:none; stroke:var(--border); stroke-width:8; }
+.ring-fill {
+  fill:none; stroke:var(--gold); stroke-width:8; stroke-linecap:round;
+  stroke-dasharray:427.26; stroke-dashoffset:427.26;
+  transition:stroke-dashoffset .4s ease,stroke .3s;
+  filter:drop-shadow(0 0 6px rgba(201,168,76,.5));
+}
+.counter-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+#counter { font-family:'Cinzel',serif; font-size:56px; font-weight:900; color:var(--gold-light); line-height:1; text-shadow:0 0 30px rgba(201,168,76,.4); transition:transform .1s; }
+#counter.pulse { transform:scale(1.12); }
+.counter-goal { font-size:11px; color:var(--text-dim); letter-spacing:.15em; margin-top:2px; }
 
-  /* MODE TOGGLE */
-  .mode-toggle { display: flex; gap: 6px; margin-bottom: 12px; }
-  .mode-btn {
-    flex: 1; padding: 9px 4px; border: 1px solid var(--border); border-radius: 8px;
-    background: var(--surface2); color: var(--text-dim);
-    font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.1em;
-    cursor: pointer; transition: all 0.2s; line-height: 1.6;
-  }
-  .mode-btn.active { border-color: var(--gold-dim); color: var(--gold); background: #1e1a0f; }
+/* ── SCREEN LOCK WARNING ── */
+.screen-warning {
+  background:#1a1000; border:1px solid #4a3000; border-radius:10px;
+  padding:9px 13px; font-size:12px; color:#c09040; margin-bottom:11px;
+  display:none; align-items:center; gap:8px; font-style:italic;
+}
+.screen-warning.show { display:flex; }
 
-  /* SLIDER */
-  .slider-wrap { margin-bottom: 12px; }
-  .slider-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-  .slider-val { font-size: 12px; color: var(--gold); font-family: 'Cinzel', serif; }
-  input[type=range] {
-    width: 100%; -webkit-appearance: none; height: 4px;
-    border-radius: 2px; background: var(--border); outline: none;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-    background: var(--gold); cursor: pointer; box-shadow: 0 0 8px rgba(201,168,76,0.4);
-  }
+/* ── SLIDER ── */
+.slider-wrap { margin-bottom:11px; }
+.slider-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.slider-val { font-size:12px; color:var(--gold); font-family:'Cinzel',serif; }
+input[type=range] { width:100%; -webkit-appearance:none; height:4px; border-radius:2px; background:var(--border); outline:none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--gold); cursor:pointer; box-shadow:0 0 8px rgba(201,168,76,.4); }
 
-  /* BUTTONS */
-  .btn {
-    width: 100%; padding: 13px; border-radius: 12px; font-family: 'Cinzel', serif;
-    font-size: 12px; font-weight: 700; letter-spacing: 0.2em;
-    cursor: pointer; border: none; transition: all 0.2s; margin-bottom: 8px;
-  }
-  #start-btn {
-    background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
-    color: #1a0e00; box-shadow: 0 4px 20px rgba(201,168,76,0.25);
-  }
-  #start-btn:hover { transform: translateY(-1px); }
-  #start-btn.stop { background: linear-gradient(135deg, #c04040, #8a2020); color: white; }
-  #reset-btn {
-    background: transparent; color: var(--text-dim);
-    border: 1px solid var(--border); font-size: 11px; padding: 10px;
-  }
-  #reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+/* ── BUTTONS ── */
+.btn { width:100%; padding:13px; border-radius:12px; font-family:'Cinzel',serif; font-size:12px; font-weight:700; letter-spacing:.2em; cursor:pointer; border:none; transition:all .2s; margin-bottom:8px; }
+#start-btn { background:linear-gradient(135deg,var(--gold),var(--amber)); color:#1a0e00; box-shadow:0 4px 20px rgba(201,168,76,.25); }
+#start-btn.stop { background:linear-gradient(135deg,#c04040,#8a2020); color:white; }
+#reset-btn { background:transparent; color:var(--text-dim); border:1px solid var(--border); font-size:11px; padding:10px; }
 
-  /* STATUS */
-  #status-box {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 9px 13px; font-size: 13px;
-    color: var(--text-dim); min-height: 38px;
-    display: flex; align-items: center; gap: 8px;
-    font-style: italic; transition: border-color 0.3s; margin-top: 4px;
-  }
-  #status-box.listening { border-color: var(--green); color: #70d090; }
-  #status-box.matched   { border-color: var(--gold);  color: var(--gold-light); }
-  #status-box.error     { border-color: var(--red);   color: #e08080; }
-  #status-box.done      { border-color: var(--green); color: var(--green); font-style: normal; font-weight: 600; }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; animation: blink 1.2s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .status-dot.static { animation: none; }
-  #heard-box { font-size: 11px; color: var(--text-dim); text-align: center; margin-top: 7px; min-height: 15px; font-style: italic; opacity: 0.7; }
+/* ── STATUS ── */
+#status-box { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:9px 13px; font-size:13px; color:var(--text-dim); min-height:38px; display:flex; align-items:center; gap:8px; font-style:italic; transition:border-color .3s; margin-top:4px; }
+#status-box.listening { border-color:var(--green); color:#70d090; }
+#status-box.matched { border-color:var(--gold); color:var(--gold-light); }
+#status-box.error { border-color:var(--red); color:#e08080; }
+#status-box.done { border-color:var(--green); color:var(--green); font-style:normal; font-weight:600; }
+.status-dot { width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; animation:blink 1.2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.status-dot.static { animation:none; }
+#heard-box { font-size:11px; color:var(--text-dim); text-align:center; margin-top:6px; min-height:15px; font-style:italic; opacity:.7; }
 
-  /* INFO TAB */
-  .info-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 18px; padding: 20px; margin-bottom: 12px; position: relative; overflow: hidden;
-  }
-  .info-card::before {
-    content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-  .mukhi-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, var(--gold-dim), #4a3a18);
-    border-radius: 8px; padding: 5px 12px; margin-bottom: 12px;
-  }
-  .mukhi-badge .num { font-family: 'Cinzel', serif; font-size: 22px; color: var(--gold-light); font-weight: 900; }
-  .mukhi-badge .label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase; }
-  .info-mantra-line { font-size: 15px; color: var(--gold); margin-bottom: 3px; font-family: 'Cinzel', serif; }
-  .info-deity { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; font-style: italic; }
-  .info-section-label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 5px; margin-top: 10px; }
-  .info-text { font-size: 14px; color: var(--text); line-height: 1.6; }
-  .benefit-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-  .tag { background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 3px 9px; font-size: 11px; color: var(--text-dim); }
-  .info-nav { display: flex; gap: 8px; margin-bottom: 12px; }
-  .info-nav-btn {
-    flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 10px;
-    background: var(--surface2); color: var(--text-dim); font-family: 'Cinzel', serif;
-    font-size: 11px; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s;
-  }
-  .info-nav-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
-  .info-search {
-    width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 14px;
-    font-family: 'Crimson Text', serif; background: var(--surface2); color: var(--text);
-    border: 1px solid var(--border); margin-bottom: 12px;
-  }
-  .info-search:focus { outline: none; border-color: var(--gold-dim); }
-  .info-search::placeholder { color: var(--text-dim); font-style: italic; }
+/* ── INFO SHARED ── */
+.divider { display:flex; align-items:center; gap:10px; margin:12px 0; color:var(--gold-dim); font-size:10px; }
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
-  /* STATS */
-  .stats-row { display: flex; gap: 8px; margin-bottom: 12px; }
-  .stat-box { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; }
-  .stat-num { font-family: 'Cinzel', serif; font-size: 20px; color: var(--gold); }
-  .stat-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; }
+.info-search { width:100%; padding:10px 14px; border-radius:10px; font-size:14px; font-family:'Crimson Text',serif; background:var(--surface2); color:var(--text); border:1px solid var(--border); margin-bottom:12px; }
+.info-search:focus { outline:none; border-color:var(--gold-dim); }
+.info-search::placeholder { color:var(--text-dim); font-style:italic; }
+.info-nav { display:flex; gap:8px; margin-bottom:12px; }
+.info-nav-btn { flex:1; padding:10px; border:1px solid var(--border); border-radius:10px; background:var(--surface2); color:var(--text-dim); font-family:'Cinzel',serif; font-size:11px; letter-spacing:.1em; cursor:pointer; transition:all .2s; }
+.info-nav-btn:hover { border-color:var(--gold-dim); color:var(--gold); }
+.info-card { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:18px; margin-bottom:12px; position:relative; overflow:hidden; }
+.info-card::before { content:''; position:absolute; top:0; left:20%; right:20%; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+.mukhi-badge { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,var(--gold-dim),#4a3a18); border-radius:8px; padding:5px 12px; margin-bottom:10px; }
+.mukhi-badge .num { font-family:'Cinzel',serif; font-size:20px; color:var(--gold-light); font-weight:900; }
+.mukhi-badge .mlabel { font-size:11px; color:var(--text-dim); letter-spacing:.2em; text-transform:uppercase; }
+.info-section-label { font-size:10px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold-dim); margin-bottom:5px; margin-top:10px; }
+.info-text { font-size:14px; color:var(--text); line-height:1.6; }
+.benefit-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+.tag { background:var(--surface3); border:1px solid var(--border2); border-radius:6px; padding:3px 9px; font-size:11px; color:var(--text-dim); }
 
-  .footer-note { text-align: center; font-size: 11px; color: var(--text-dim); font-style: italic; margin-top: 10px; opacity: 0.6; }
+/* ── CHAKRA CARDS ── */
+.chakra-card {
+  border-radius:14px; padding:16px; margin-bottom:10px;
+  border:1px solid rgba(255,255,255,.08); position:relative; overflow:hidden;
+}
+.chakra-card::after { content:''; position:absolute; inset:0; opacity:.06; background:var(--chakra-color); pointer-events:none; }
+.chakra-header { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.chakra-symbol { font-size:28px; line-height:1; }
+.chakra-title { font-family:'Cinzel',serif; font-size:14px; color:var(--chakra-color); }
+.chakra-sub { font-size:11px; color:var(--text-dim); letter-spacing:.1em; }
+.chakra-mantra { background:rgba(0,0,0,.3); border-radius:8px; padding:8px 12px; margin-bottom:8px; }
+.chakra-mantra-text { font-size:13px; color:var(--gold-light); }
+.chakra-rudrakshas { display:flex; flex-wrap:wrap; gap:5px; }
+.chakra-r-tag { border-radius:6px; padding:3px 9px; font-size:11px; border:1px solid; }
+
+/* ── FRIENDS TAB ── */
+.friends-header { text-align:center; padding:20px 0 10px; }
+.friends-title { font-family:'Cinzel',serif; font-size:18px; color:var(--gold); margin-bottom:4px; }
+.friends-sub { font-size:13px; color:var(--text-dim); font-style:italic; }
+.leaderboard-row {
+  display:flex; align-items:center; gap:12px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:12px; padding:12px 14px; margin-bottom:8px;
+}
+.lb-rank { font-family:'Cinzel',serif; font-size:18px; color:var(--gold-dim); width:28px; text-align:center; }
+.lb-rank.gold { color:#ffd700; }
+.lb-rank.silver { color:#c0c0c0; }
+.lb-rank.bronze { color:#cd7f32; }
+.lb-avatar { width:38px; height:38px; border-radius:50%; background:var(--surface3); border:2px solid var(--border2); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.lb-name { flex:1; }
+.lb-name .name { font-size:14px; color:var(--text); }
+.lb-name .mantra-count { font-size:11px; color:var(--text-dim); }
+.lb-count { font-family:'Cinzel',serif; font-size:14px; color:var(--gold); }
+.invite-btn { width:100%; padding:13px; border-radius:12px; font-family:'Cinzel',serif; font-size:12px; font-weight:700; letter-spacing:.2em; cursor:pointer; border:1px solid var(--gold-dim); background:transparent; color:var(--gold); transition:all .2s; margin-bottom:8px; }
+.invite-btn:hover { background:rgba(201,168,76,.1); }
+.challenge-card { background:linear-gradient(135deg,#1a1000,#0a0800); border:1px solid #4a3000; border-radius:14px; padding:16px; margin-bottom:10px; }
+.challenge-title { font-family:'Cinzel',serif; font-size:13px; color:#c09040; margin-bottom:6px; }
+.challenge-desc { font-size:13px; color:var(--text-dim); margin-bottom:10px; }
+.progress-bar-wrap { background:var(--border); border-radius:4px; height:6px; overflow:hidden; }
+.progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--amber)); border-radius:4px; transition:width .4s; }
+.coming-soon-chip { display:inline-block; background:#1a1030; border:1px solid #6040a0; border-radius:20px; padding:2px 10px; font-size:10px; color:#a080e0; letter-spacing:.1em; margin-left:8px; }
+
+/* ── STATS ── */
+.stats-row { display:flex; gap:8px; margin-bottom:12px; }
+.stat-box { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center; }
+.stat-num { font-family:'Cinzel',serif; font-size:20px; color:var(--gold); }
+.stat-label { font-size:9px; color:var(--text-dim); letter-spacing:.12em; text-transform:uppercase; margin-top:2px; }
+.streak-card { background:linear-gradient(135deg,#1a1000,#0a0800); border:1px solid #4a3000; border-radius:14px; padding:14px; margin-bottom:12px; display:flex; align-items:center; gap:14px; }
+.streak-num { font-family:'Cinzel',serif; font-size:36px; color:#f0a030; line-height:1; }
+.streak-label { font-size:11px; color:var(--text-dim); letter-spacing:.15em; text-transform:uppercase; }
+.streak-sub { font-size:12px; color:var(--text-dim); font-style:italic; margin-top:2px; }
+
+/* ── PREMIUM MODAL ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.show { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:24px; padding:28px 22px; max-width:400px; width:100%; position:relative; box-shadow:0 0 60px rgba(144,96,192,.15); }
+.modal::before { content:''; position:absolute; top:0; left:20%; right:20%; height:1px; background:linear-gradient(90deg,transparent,#9060c0,transparent); }
+.modal-title { font-family:'Cinzel',serif; font-size:20px; color:#d0a0ff; text-align:center; margin-bottom:4px; }
+.modal-sub { font-size:13px; color:var(--text-dim); text-align:center; font-style:italic; margin-bottom:20px; }
+.plan-card { border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:10px; cursor:pointer; transition:all .2s; position:relative; }
+.plan-card:hover, .plan-card.selected { border-color:#9060c0; background:#12101a; }
+.plan-card .plan-name { font-family:'Cinzel',serif; font-size:14px; color:#d0a0ff; }
+.plan-card .plan-price { font-size:13px; color:var(--text-dim); margin-top:3px; }
+.plan-card .plan-badge { position:absolute; top:-8px; right:14px; background:#7040a0; border-radius:20px; padding:2px 10px; font-size:10px; color:#fff; font-family:'Cinzel',serif; }
+.feature-list { margin:16px 0 20px; }
+.feature-item { display:flex; align-items:center; gap:10px; padding:6px 0; font-size:13px; color:var(--text); border-bottom:1px solid var(--border); }
+.feature-icon { width:20px; text-align:center; color:var(--green); }
+.subscribe-btn { width:100%; padding:14px; border-radius:12px; font-family:'Cinzel',serif; font-size:13px; font-weight:700; letter-spacing:.2em; cursor:pointer; border:none; background:linear-gradient(135deg,#7040a0,#402060); color:#d0a0ff; box-shadow:0 4px 20px rgba(112,64,160,.3); margin-bottom:10px; }
+.modal-close { width:100%; padding:10px; border-radius:10px; font-family:'Cinzel',serif; font-size:11px; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text-dim); }
+
+.footer-note { text-align:center; font-size:11px; color:var(--text-dim); font-style:italic; margin-top:8px; opacity:.6; }
 </style>
 </head>
 <body>
 <div class="page">
 
-  <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('counter', this)">OM COUNTER</button>
-    <button class="tab-btn" onclick="showTab('info', this)">RUDRAKSHA INFO</button>
-    <button class="tab-btn" onclick="showTab('stats', this)">MY STATS</button>
+<!-- APP HEADER -->
+<div class="app-header">
+  <div>
+    <div class="app-name">RUDRAMALA</div>
+    <div class="app-tagline">SACRED MANTRA COUNTER</div>
   </div>
+  <button class="premium-badge" id="premium-badge-btn" onclick="openPremium()">✦ GO PREMIUM</button>
+</div>
 
-  <!-- COUNTER TAB -->
-  <div class="tab-panel active" id="tab-counter">
-    <div class="card">
-      <div class="header">
-        <div class="om">ॐ</div>
-        <h1>Rudraksha Mantra Counter</h1>
-      </div>
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-counter" onclick="showTab('counter',this)">
+    <span class="nav-icon">ॐ</span>COUNTER
+  </button>
+  <button class="nav-btn" id="nav-rudraksha" onclick="showTab('rudraksha',this)">
+    <span class="nav-icon">📿</span>RUDRAKSHA
+  </button>
+  <button class="nav-btn" id="nav-chakra" onclick="showTab('chakra',this)">
+    <span class="nav-icon">🌀</span>CHAKRAS
+  </button>
+  <button class="nav-btn" id="nav-friends" onclick="showTab('friends',this)">
+    <span class="nav-icon">🤝</span>FRIENDS
+  </button>
+  <button class="nav-btn" id="nav-stats" onclick="showTab('stats',this)">
+    <span class="nav-icon">✦</span>STATS
+  </button>
+</div>
 
-      <div class="field">
-        <div class="field-label">Select Rudraksha Mukhi</div>
-        <select id="mantra-select" onchange="onMantraChange()"></select>
-      </div>
+<!-- ══════ COUNTER TAB ══════ -->
+<div class="tab-panel active" id="tab-counter">
+  <div class="card">
+    <div class="header">
+      <div class="om">ॐ</div>
+      <h2>Mantra Counter</h2>
+    </div>
 
-      <div class="mantra-display">
-        <div class="mantra-sanskrit" id="mantra-text">Om Hrim Namah</div>
-        <div class="mantra-hindi" id="mantra-hindi">Om Hrim Namah</div>
-      </div>
+    <!-- Screen lock warning -->
+    <div class="screen-warning" id="screen-warning">
+      <span>⚠️</span>
+      <span>Keep screen ON while chanting. Browser mic pauses when screen locks. Native app coming soon for background mode!</span>
+    </div>
 
-      <div class="field">
-        <div class="field-label">Target Count</div>
-        <select id="target-select" onchange="onTargetChange()">
-          <option value="11">11 — Ekadashi</option>
-          <option value="33">33 — Tridasha</option>
-          <option value="54">54 — Half Mala</option>
-          <option value="108" selected>108 — Full Mala</option>
-        </select>
-      </div>
+    <div class="field">
+      <div class="field-label">Select Rudraksha</div>
+      <select id="mantra-select" onchange="onMantraChange()"></select>
+    </div>
 
-      <div class="divider">✦</div>
+    <div class="mantra-display">
+      <div class="mantra-en" id="mantra-text">Om Hrim Namah</div>
+      <div class="mantra-hi" id="mantra-hindi">ॐ ह्रीं नमः</div>
+    </div>
 
-      <div class="field-label" style="margin-bottom:7px">Detection Mode</div>
-      <div class="mode-toggle">
-        <button class="mode-btn active" id="mode-namah" onclick="setMode('namah')">
-          NAMAH ONLY<br><span style="font-size:8px;opacity:0.7">Fast &amp; Accurate</span>
-        </button>
-        <button class="mode-btn" id="mode-full" onclick="setMode('full')">
-          FULL MANTRA<br><span style="font-size:8px;opacity:0.7">Strict Match</span>
-        </button>
-      </div>
+    <div class="field">
+      <div class="field-label">Target Count</div>
+      <select id="target-select" onchange="onTargetChange()">
+        <option value="11">11 — Ekadashi (Free)</option>
+        <option value="33" class="premium-opt">33 — Tridasha ✦ Premium</option>
+        <option value="54" class="premium-opt">54 — Half Mala ✦ Premium</option>
+        <option value="108" class="premium-opt">108 — Full Mala ✦ Premium</option>
+      </select>
+    </div>
 
-      <div class="counter-wrap">
-        <div class="ring-container">
-          <svg class="progress-ring" viewBox="0 0 170 170">
-            <circle class="ring-bg" cx="85" cy="85" r="72"/>
-            <circle class="ring-fill" id="ring" cx="85" cy="85" r="72"/>
-          </svg>
-          <div class="counter-inner">
-            <div id="counter">0</div>
-            <div class="counter-goal" id="goal-label">of 108</div>
-          </div>
+    <div class="divider">✦</div>
+
+    <div class="counter-wrap">
+      <div class="ring-container">
+        <svg class="progress-ring" viewBox="0 0 160 160">
+          <circle class="ring-bg" cx="80" cy="80" r="68"/>
+          <circle class="ring-fill" id="ring" cx="80" cy="80" r="68"/>
+        </svg>
+        <div class="counter-inner">
+          <div id="counter">0</div>
+          <div class="counter-goal" id="goal-label">of 11</div>
         </div>
       </div>
-
-      <div class="slider-wrap">
-        <div class="slider-row">
-          <div class="field-label">Voice Sensitivity</div>
-          <div class="slider-val" id="sens-val">Medium</div>
-        </div>
-        <input type="range" id="sensitivity" min="1" max="3" value="2" step="1" oninput="onSensChange()">
-      </div>
-
-      <button class="btn" id="start-btn" onclick="toggleStart()">&#9654; START LISTENING</button>
-      <button class="btn" id="reset-btn" onclick="doReset()">&#8635; RESET</button>
-
-      <div id="status-box">
-        <span class="status-dot static"></span>
-        <span id="status-text">Ready to begin</span>
-      </div>
-      <div id="heard-box"></div>
     </div>
-    <div class="footer-note">Requires Chrome browser &middot; Mic permission needed<br>Chant clearly &mdash; "Namah" at end triggers count</div>
+
+    <div class="slider-wrap">
+      <div class="slider-row">
+        <div class="field-label">Voice Sensitivity</div>
+        <div class="slider-val" id="sens-val">Medium</div>
+      </div>
+      <input type="range" id="sensitivity" min="1" max="3" value="2" step="1" oninput="onSensChange()">
+    </div>
+
+    <button class="btn" id="start-btn" onclick="toggleStart()">▶ START LISTENING</button>
+    <button class="btn" id="reset-btn" onclick="doReset()">↺ RESET</button>
+
+    <div id="status-box">
+      <span class="status-dot static"></span>
+      <span id="status-text">Ready to begin — chant "Om ... Namah"</span>
+    </div>
+    <div id="heard-box"></div>
   </div>
+  <div class="footer-note">Chrome browser required · Keep screen ON<br>Detection: listens for "Namah" at end of each chant</div>
+</div>
 
-  <!-- INFO TAB -->
-  <div class="tab-panel" id="tab-info">
-    <input class="info-search" type="text" id="info-search" placeholder="Search by mukhi, deity, or benefit…" oninput="filterInfo()">
-    <div class="info-nav">
-      <button class="info-nav-btn" onclick="infoStep(-1)">&#9664; PREV</button>
-      <button class="info-nav-btn" onclick="infoStep(1)">NEXT &#9654;</button>
-    </div>
-    <div id="info-content"></div>
+<!-- ══════ RUDRAKSHA INFO TAB ══════ -->
+<div class="tab-panel" id="tab-rudraksha">
+  <input class="info-search" type="text" id="rudra-search" placeholder="Search mukhi, deity, benefit…" oninput="filterRudra()">
+  <div class="info-nav">
+    <button class="info-nav-btn" onclick="rudraStep(-1)">◀ PREV</button>
+    <button class="info-nav-btn" onclick="rudraStep(1)">NEXT ▶</button>
   </div>
+  <div id="rudra-content"></div>
+</div>
 
-  <!-- STATS TAB -->
-  <div class="tab-panel" id="tab-stats">
-    <div class="card">
-      <div class="header">
-        <div class="om" style="font-size:20px">&#10022;</div>
-        <h1>My Sadhana Stats</h1>
-      </div>
-      <div class="stats-row">
-        <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Chants</div></div>
-        <div class="stat-box"><div class="stat-num" id="stat-sessions">0</div><div class="stat-label">Sessions</div></div>
-        <div class="stat-box"><div class="stat-num" id="stat-malas">0</div><div class="stat-label">Malas Done</div></div>
-      </div>
-      <div class="field-label" style="margin-bottom:8px">Recent Sessions</div>
-      <div id="session-log" style="font-size:13px;color:var(--text-dim);line-height:2">No sessions yet.</div>
+<!-- ══════ CHAKRA TAB ══════ -->
+<div class="tab-panel" id="tab-chakra">
+  <div class="card" style="margin-bottom:14px">
+    <div class="header">
+      <div class="om" style="font-size:20px">🌀</div>
+      <h2>Chakra · Rudraksha · Mantra</h2>
     </div>
-    <div class="card" style="margin-top:0">
-      <button class="btn" onclick="clearStats()" style="background:var(--surface2);color:var(--red);border:1px solid var(--red);font-size:11px;padding:10px;margin:0">CLEAR ALL STATS</button>
+    <div style="font-size:13px;color:var(--text-dim);text-align:center;font-style:italic;margin-top:-8px">
+      Each chakra is activated by specific Rudrakshas and their seed mantras
     </div>
   </div>
+  <div id="chakra-list"></div>
+</div>
 
+<!-- ══════ FRIENDS TAB ══════ -->
+<div class="tab-panel" id="tab-friends">
+  <div class="friends-header">
+    <div class="friends-title">Sadhana Circle</div>
+    <div class="friends-sub">Chant together · Grow together</div>
+  </div>
+
+  <!-- Weekly Challenge -->
+  <div class="challenge-card">
+    <div class="challenge-title">🏆 This Week's Challenge <span class="coming-soon-chip">COMING SOON</span></div>
+    <div class="challenge-desc">108 Full Mala — Complete before Sunday</div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-bottom:6px">
+      <span>Your progress</span><span>0 / 108</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%"></div></div>
+  </div>
+
+  <!-- Leaderboard (demo) -->
+  <div class="card">
+    <div class="field-label" style="margin-bottom:12px">Friend Leaderboard <span class="coming-soon-chip">DEMO</span></div>
+    <div id="leaderboard">
+      <div class="leaderboard-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">🧘</div>
+        <div class="lb-name"><div class="name">Priya S.</div><div class="mantra-count">1 Mukhi — Om Hrim Namah</div></div>
+        <div class="lb-count">108</div>
+      </div>
+      <div class="leaderboard-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">🙏</div>
+        <div class="lb-name"><div class="name">Rahul M.</div><div class="mantra-count">5 Mukhi — Om Hrim Namah</div></div>
+        <div class="lb-count">54</div>
+      </div>
+      <div class="leaderboard-row">
+        <div class="lb-rank bronze">3</div>
+        <div class="lb-avatar">✨</div>
+        <div class="lb-name"><div class="name">You</div><div class="mantra-count">—</div></div>
+        <div class="lb-count" id="lb-you">0</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="invite-btn" onclick="shareApp()">📤 INVITE A FRIEND TO RUDRAMALA</button>
+
+  <div class="card" style="text-align:center;padding:20px">
+    <div style="font-size:28px;margin-bottom:8px">🚀</div>
+    <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);margin-bottom:6px">FRIENDS FEATURE — COMING IN v2.0</div>
+    <div style="font-size:13px;color:var(--text-dim);line-height:1.7">Real-time friend stats, group challenges,<br>and daily streaks require our backend server.<br>Sign up below to be notified at launch.</div>
+    <button class="btn" onclick="notifyMe()" style="margin-top:14px;background:linear-gradient(135deg,#7040a0,#402060);color:#d0a0ff;margin-bottom:0">🔔 NOTIFY ME AT LAUNCH</button>
+  </div>
+</div>
+
+<!-- ══════ STATS TAB ══════ -->
+<div class="tab-panel" id="tab-stats">
+  <!-- Streak -->
+  <div class="streak-card">
+    <div>
+      <div class="streak-num" id="stat-streak">0</div>
+      <div class="streak-label">Day Streak</div>
+    </div>
+    <div>
+      <div class="streak-sub">Chant daily to build your streak</div>
+      <div style="font-size:11px;color:var(--gold-dim);margin-top:4px" id="last-chant-label">No session yet</div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Chants</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-sessions">0</div><div class="stat-label">Sessions</div></div>
+    <div class="stat-box"><div class="stat-num" id="stat-malas">0</div><div class="stat-label">Full Malas</div></div>
+  </div>
+
+  <div class="card">
+    <div class="field-label" style="margin-bottom:10px">Recent Sessions</div>
+    <div id="session-log" style="font-size:13px;color:var(--text-dim)">No sessions yet. Start chanting! 🙏</div>
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <button class="btn" onclick="clearStats()" style="background:transparent;color:var(--red);border:1px solid var(--red);font-size:11px;padding:10px;margin:0">↺ CLEAR ALL STATS</button>
+  </div>
+</div>
+
+</div><!-- end .page -->
+
+<!-- PREMIUM MODAL -->
+<div class="modal-overlay" id="premium-modal">
+  <div class="modal">
+    <div class="modal-title">✦ RudraMala Premium</div>
+    <div class="modal-sub">Deepen your sadhana — no limits</div>
+
+    <div class="plan-card selected" onclick="selectPlan(this,'monthly')">
+      <div class="plan-badge">POPULAR</div>
+      <div class="plan-name">Monthly</div>
+      <div class="plan-price">₹99 / month &nbsp;·&nbsp; Cancel anytime</div>
+    </div>
+    <div class="plan-card" onclick="selectPlan(this,'yearly')">
+      <div class="plan-name">Yearly</div>
+      <div class="plan-price">₹699 / year &nbsp;·&nbsp; Save 41%</div>
+    </div>
+
+    <div class="feature-list">
+      <div class="feature-item"><span class="feature-icon">✓</span> 33, 54 &amp; 108 chant targets</div>
+      <div class="feature-item"><span class="feature-icon">✓</span> Full session history &amp; streaks</div>
+      <div class="feature-item"><span class="feature-icon">✓</span> Friends leaderboard &amp; challenges</div>
+      <div class="feature-item"><span class="feature-icon">✓</span> Background mic (native app)</div>
+      <div class="feature-item"><span class="feature-icon">✓</span> All 26 Mukhis + Gaurishankar</div>
+      <div class="feature-item"><span class="feature-icon">✓</span> Chakra activation guide</div>
+      <div class="feature-item"><span class="feature-icon">✓</span> Ad-free forever</div>
+    </div>
+
+    <button class="subscribe-btn" onclick="activatePremium()">✦ START PREMIUM</button>
+    <button class="modal-close" onclick="closePremium()">Maybe later</button>
+  </div>
 </div>
 
 <script>
-// ════════════════════════════════════════
-// RUDRAKSHA DATA — All 26 Mukhis + Gaurishankar
-// ════════════════════════════════════════
+// ══════════════════════════════════════
+// DATA — RUDRAKSHA
+// ══════════════════════════════════════
 const rudrakshaData = [
-  { mukhi:1,  label:"1 Mukhi",      mantra:"Om Hrim Namah",                                  hindi:"Om Hrim Namah",                             deity:"Shiva (Parameshwara)",         planet:"Sun",        benefits:["Supreme consciousness","Removes sins","Moksha","Leadership","Mental clarity"],               description:"The rarest and most powerful Rudraksha. Represents Shiva himself. Wearing it brings the wearer closest to divine consciousness and destroys sins accumulated over lifetimes. Rare to find authentic ones.",                                     keywords:["om","hrim","hreem","rim","namah","nama"] },
-  { mukhi:2,  label:"2 Mukhi",      mantra:"Om Namah",                                        hindi:"Om Namah",                                   deity:"Ardhanarishvara (Shiva-Shakti)",planet:"Moon",       benefits:["Harmony in relationships","Emotional balance","Marital bliss","Unity","Removes ego"],         description:"Represents the divine union of Shiva and Shakti. Brings harmony between partners, removes ego, and grants emotional stability. Excellent for couples and those seeking inner peace.",                                                          keywords:["om","namah","nama","namo"] },
-  { mukhi:3,  label:"3 Mukhi",      mantra:"Om Klim Namah",                                   hindi:"Om Klim Namah",                              deity:"Agni (Fire God)",              planet:"Mars",       benefits:["Burns past karma","Self-confidence","Freedom from guilt","Digestive health","Energy boost"],   description:"Ruled by Agni the fire god. Burns past karma and negative impressions. Liberates the wearer from guilt and inferiority complex. Excellent for stomach and liver issues.",                                                                      keywords:["om","klim","kleem","namah","nama"] },
-  { mukhi:4,  label:"4 Mukhi",      mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Brahma (Creator)",             planet:"Mercury",    benefits:["Intelligence","Memory","Creativity","Speech power","Students & teachers"],                    description:"Represents Brahma the creator. Enhances intelligence, memory, and creative faculties. Highly beneficial for students, researchers, teachers, and anyone in creative or communication professions.",                                             keywords:["om","hrim","hreem","rim","namah","nama"] },
-  { mukhi:5,  label:"5 Mukhi",      mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Kalagni Rudra",                planet:"Jupiter",    benefits:["General wellbeing","Health","Peace of mind","Education","Prosperity"],                        description:"The most common and widely worn Rudraksha. Ruled by Jupiter. Brings overall wellbeing, health, and peace. Suitable for everyone. Purifies the wearer and calms the mind naturally.",                                                          keywords:["om","hrim","hreem","rim","namah","nama"] },
-  { mukhi:6,  label:"6 Mukhi",      mantra:"Om Hrim Hoom Namah",                              hindi:"Om Hrim Hoom Namah",                         deity:"Kartikeya (Skanda)",           planet:"Venus",      benefits:["Willpower","Focus","Artistic abilities","Leadership","Wisdom"],                               description:"Represents Kartikeya, son of Shiva. Gives willpower, focus, and strength. Excellent for artists, managers, and those in leadership roles requiring determination and creative intelligence.",                                                  keywords:["om","hrim","hreem","rim","hoom","hum","namah","nama"] },
-  { mukhi:7,  label:"7 Mukhi",      mantra:"Om Hum Namah",                                    hindi:"Om Hum Namah",                               deity:"Saptamatrika / Mahalakshmi",   planet:"Saturn",     benefits:["Wealth attraction","Removes poverty","Business success","Financial luck","Health"],            description:"Represents the seven divine mothers and Mahalakshmi. Extremely powerful for attracting wealth and removing financial obstacles. Favored by businesspeople and those facing Saturn's malefic effects.",                                          keywords:["om","hum","hoom","home","namah","nama"] },
-  { mukhi:8,  label:"8 Mukhi",      mantra:"Om Hum Namah",                                    hindi:"Om Hum Namah",                               deity:"Ganesha",                      planet:"Rahu",       benefits:["Removes obstacles","Success in all work","Intellect","Intuition","Protection"],               description:"Represents Ganesha, remover of obstacles. Gives intelligence to overcome all hurdles. Neutralizes malefic effects of Rahu and protects from negative energies and black magic.",                                                              keywords:["om","hum","hoom","home","namah","nama"] },
-  { mukhi:9,  label:"9 Mukhi",      mantra:"Om Hrim Hum Namah",                               hindi:"Om Hrim Hum Namah",                          deity:"Durga (Navadurga)",            planet:"Ketu",       benefits:["Fearlessness","Power","Dynamic energy","Removes Ketu doshas","Protection from enemies"],      description:"Represents the nine forms of Goddess Durga. Infuses the wearer with fearlessness, power, and dynamic energy. Excellent for neutralizing Ketu's malefic influence and protection from all fears.",                                            keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"] },
-  { mukhi:10, label:"10 Mukhi",     mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Lord Vishnu",                  planet:"All Planets",benefits:["All planets pacified","Legal victories","Protection","Peace","Success"],                       description:"Represents Lord Vishnu the preserver. Pacifies all nine planets simultaneously. Provides complete protection and ensures success in legal matters and disputes of all kinds.",                                                                  keywords:["om","hrim","hreem","rim","namah","nama"] },
-  { mukhi:11, label:"11 Mukhi",     mantra:"Om Hrim Hum Namah",                               hindi:"Om Hrim Hum Namah",                          deity:"Eleven Rudras / Hanuman",      planet:"All Planets",benefits:["Adventure","Wisdom","Right decisions","Strength","Deep meditation"],                          description:"Represents the eleven Rudras. Gives wisdom to make right decisions. Blesses with Hanuman's strength and protection. Favored by meditators, travelers, and those seeking adventure in life.",                                                  keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"] },
-  { mukhi:12, label:"12 Mukhi",     mantra:"Om Krom Srom Rom Namah",                          hindi:"Om Krom Srom Rom Namah",                     deity:"Surya (Sun God)",              planet:"Sun",        benefits:["Confidence","Leadership","Administrative power","Eye health","Removes sun doshas"],           description:"Represents the twelve Adityas. Radiates solar energy, bestows confidence and leadership. Excellent for politicians, executives, and those suffering from eye or heart problems.",                                                              keywords:["om","krom","srom","rom","namah","nama"] },
-  { mukhi:13, label:"13 Mukhi",     mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Kamadeva / Indra",             planet:"Venus/Mercury",benefits:["Fulfills desires","Charisma","Attraction","Material success","Spiritual growth"],         description:"Represents Kamadeva and Indra. Fulfills worldly desires and grants charm and charisma. The wearer becomes attractive and achieves success in all endeavors, both material and spiritual.",                                                    keywords:["om","hrim","hreem","rim","namah","nama"] },
-  { mukhi:14, label:"14 Mukhi",     mantra:"Om Namah",                                        hindi:"Om Namah",                                   deity:"Deva Mani / Shiva Third Eye",  planet:"Saturn/Mars",benefits:["Intuition","Foresight","Ajna chakra","Supreme protection","Consciousness expansion"],      description:"Called Deva Mani. Among the most divine Rudrakshas after the 1 Mukhi. Opens the Ajna (third eye) chakra. Sharpens intuition to a supernatural level and provides supreme protection from all harm.",                                        keywords:["om","namah","nama","namo"] },
-  { mukhi:15, label:"15 Mukhi",     mantra:"Om Hrim Namah",                                   hindi:"Om Hrim Namah",                              deity:"Pashupatinath",                planet:"Mercury",    benefits:["Lateral thinking","Abstract intellect","Hidden knowledge","Business success","Healing"],       description:"Represents Pashupatinath. Enhances lateral and abstract thinking. Beneficial for healers, doctors, and those pursuing hidden or esoteric knowledge. Brings business acumen and prosperity.",                                                  keywords:["om","hrim","hreem","rim","namah","nama"] },
-  { mukhi:16, label:"16 Mukhi",     mantra:"Om Hrim Hum Namah",                               hindi:"Om Hrim Hum Namah",                          deity:"Mahamrityunjaya Shiva",        planet:"Moon",       benefits:["Victory over death","Fear removal","Protection","Long life","Health recovery"],               description:"Represents Shiva's victory over death. Provides fearlessness and protection from untimely death, accidents, and disease. Amplifies the Mahamrityunjaya mantra effect when chanted regularly.",                                               keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"] },
-  { mukhi:17, label:"17 Mukhi",     mantra:"Om Hrim Hum Hum Namah",                           hindi:"Om Hrim Hum Hum Namah",                      deity:"Vishwakarma / Katyayani",      planet:"Saturn",     benefits:["Sudden wealth","Land & property","Manifestation","Material gains","Saturn Sadesati relief"],  description:"Represents Vishwakarma (divine architect) and Katyayani. Attracts sudden and unexpected wealth, land, and property. Very powerful for Saturn Sadesati. Helps manifest material desires rapidly.",                                             keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"] },
-  { mukhi:18, label:"18 Mukhi",     mantra:"Om Hrim Hum Ekatva Rupe Hum Hrim Om",             hindi:"Om Hrim Hum Ekatva Rupe Hum Hrim Om",        deity:"Bhumi Devi (Earth Goddess)",   planet:"Earth",      benefits:["Grounding","Real estate success","Fertility","Mother health","Stability"],                     description:"Represents Bhumi Devi, the Earth goddess. Beneficial for pregnant women and maternal health. Brings grounding, stability, and extraordinary success in real estate and land dealings.",                                                       keywords:["om","hrim","hreem","hum","hoom","ekatva","rupe","namah","nama"] },
-  { mukhi:19, label:"19 Mukhi",     mantra:"Om Namoh Bhagwate Vashu Devaya Namah",            hindi:"Om Namoh Bhagwate Vashu Devaya Namah",       deity:"Lord Vishnu (Narayana)",       planet:"Mercury",    benefits:["Unlimited wealth","All desires fulfilled","Business growth","Protection","Spiritual progress"], description:"Represents Lord Vishnu in his complete form. One of the rarest beads for material prosperity. Fulfills all legitimate desires and provides Vishnu's complete divine protection and grace.",                                                   keywords:["om","namoh","namo","bhagwate","vashu","devaya","namah","nama"] },
-  { mukhi:20, label:"20 Mukhi",     mantra:"Om Hrim Hrim Hum Hum Brahmane Namah",             hindi:"Om Hrim Hrim Hum Hum Brahmane Namah",        deity:"Brahma (Trimurti)",            planet:"All Planets",benefits:["Creation power","All-round success","Wisdom","Divine protection","Moksha path"],            description:"Represents Brahma in his most expansive form. Extremely rare. Gives cosmic creative power and all-round success across every domain of life. Provides divine protection from all directions.",                                                keys:["om","hrim","hreem","hum","hoom","brahmane","namah","nama"],                                                                                                                                                                                                                        keywords:["om","hrim","hreem","hum","hoom","brahmane","namah","nama"] },
-  { mukhi:21, label:"21 Mukhi",     mantra:"Om Hreem Hoom Shivaya Namah",                     hindi:"Om Hreem Hoom Shivaya Namah",                deity:"Kubera / Shiva",               planet:"All Planets",benefits:["Supreme wealth","Power","Status","All planets pacified","Kubera blessings"],               description:"Considered the king of Rudrakshas for wealth. Represents Kubera, lord of wealth. Pacifies all planets and opens all doors of prosperity. Historically worn by maharajas, saints, and great sages.",                                          keywords:["om","hreem","hrim","hoom","hum","shivaya","namah","nama"] },
-  { mukhi:22, label:"22 Mukhi",     mantra:"Om Hreem Hum Namah",                              hindi:"Om Hreem Hum Namah",                         deity:"Brahma (Subtle form)",         planet:"All Planets",benefits:["Deep meditation","Cosmic awareness","Removes deep ego","Spiritual clarity","Liberation"],    description:"One of the rarest Rudrakshas. Connects with Brahma's subtle creative intelligence. Removes deep-rooted ego and brings cosmic awareness. Ideal for advanced spiritual seekers on the path of liberation.",                                    keywords:["om","hreem","hrim","hum","hoom","namah","nama"] },
-  { mukhi:23, label:"23 Mukhi",     mantra:"Om Namo Bhagwatey Vishnu Devaya Namah",           hindi:"Om Namo Bhagwatey Vishnu Devaya Namah",      deity:"Shiva-Vishnu combined",        planet:"All Planets",benefits:["Ultimate success","Harmony","Fame","Longevity","Combined divine grace"],                   description:"An extraordinarily rare bead combining energies of both Shiva and Vishnu. Brings ultimate success, harmony, and the combined divine grace of the two supreme deities in Hindu tradition.",                                                    keywords:["om","namo","bhagwatey","vishnu","devaya","namah","nama"] },
-  { mukhi:24, label:"24 Mukhi",     mantra:"Om Krom Shrom Rom Namah",                         hindi:"Om Krom Shrom Rom Namah",                    deity:"Brahma (Ultimate Creator)",    planet:"Sun",        benefits:["Ultimate creation power","Divine authority","Cosmic wisdom","Supreme protection","All success"], description:"Among the rarest Rudrakshas. Represents Brahma's ultimate creative authority. Gives cosmic wisdom and supreme protection. Very few authentic beads exist worldwide — treat with great reverence.",                                          keywords:["om","krom","shrom","rom","namah","nama"] },
-  { mukhi:25, label:"25 Mukhi",     mantra:"Om Hreem Shreem Vam Tripura Sundari Devyai Namah",hindi:"Om Hreem Shreem Vam Tripura Sundari Devyai Namah",deity:"Tripura Sundari (Devi)",  planet:"All Planets",benefits:["Divine feminine power","Beauty","Supreme Shakti","Cosmic wisdom","Moksha"],               description:"Extremely rare. Represents Tripura Sundari, the most beautiful and supreme form of Goddess. Awakens divine feminine energy. Said to grant liberation (Moksha) directly to the wearer over time.",                                            keywords:["om","hreem","hrim","shreem","shrim","vam","tripura","sundari","devyai","namah","nama"] },
-  { mukhi:"G",label:"Gaurishankar", mantra:"Om Gauri Shankaray Namaha",                       hindi:"Om Gauri Shankaray Namaha",                  deity:"Shiva & Parvati (Union)",      planet:"Moon",       benefits:["Marital harmony","Love","Family peace","Soul unity","Spiritual partnership"],                   description:"Two naturally joined Rudrakshas representing the divine union of Shiva and Parvati. The most powerful bead for marital harmony and love. Brings unity, peace, and divine love into all relationships.", keywords:["om","gauri","gowri","shankaray","shankar","namaha","namah","nama"] }
+  {mukhi:1,  label:"1 Mukhi",     mantra:"Om Hrim Namah",                                       hindi:"ॐ ह्रीं नमः",                              deity:"Shiva (Parameshwara)",         planet:"Sun",         chakra:"Sahasrara (Crown)",  benefits:["Supreme consciousness","Moksha","Leadership","Removes all sins","Mental clarity"],              description:"The rarest and most powerful Rudraksha. Represents Shiva himself. Brings the wearer closest to divine consciousness and destroys sins accumulated over lifetimes.",                                                                                                                        keywords:["om","hrim","hreem","rim","namah","nama"]},
+  {mukhi:2,  label:"2 Mukhi",     mantra:"Om Namah",                                             hindi:"ॐ नमः",                                    deity:"Ardhanarishvara",              planet:"Moon",        chakra:"Svadhishthana (Sacral)", benefits:["Harmony","Emotional balance","Marital bliss","Unity","Removes ego"],                           description:"Represents the divine union of Shiva and Shakti. Brings harmony between partners, removes ego, and grants emotional stability. Excellent for couples.",                                                                                                                                    keywords:["om","namah","nama","namo"]},
+  {mukhi:3,  label:"3 Mukhi",     mantra:"Om Klim Namah",                                        hindi:"ॐ क्लीं नमः",                              deity:"Agni (Fire God)",              planet:"Mars",        chakra:"Manipura (Solar Plexus)", benefits:["Burns past karma","Self-confidence","Freedom from guilt","Digestive health","Energy"],          description:"Ruled by Agni the fire god. Burns past karma and negative impressions. Liberates the wearer from guilt and inferiority complex. Excellent for stomach and liver issues.",                                                                                                                  keywords:["om","klim","kleem","namah","nama"]},
+  {mukhi:4,  label:"4 Mukhi",     mantra:"Om Hrim Namah",                                        hindi:"ॐ ह्रीं नमः",                              deity:"Brahma (Creator)",             planet:"Mercury",     chakra:"Vishuddha (Throat)",   benefits:["Intelligence","Memory","Creativity","Speech power","Students & teachers"],                       description:"Represents Brahma the creator. Enhances intelligence, memory, and creative faculties. Highly beneficial for students, researchers, teachers, and communication professionals.",                                                                                                            keywords:["om","hrim","hreem","rim","namah","nama"]},
+  {mukhi:5,  label:"5 Mukhi",     mantra:"Om Hrim Namah",                                        hindi:"ॐ ह्रीं नमः",                              deity:"Kalagni Rudra",                planet:"Jupiter",     chakra:"Ajna (Third Eye)",     benefits:["General wellbeing","Health","Peace of mind","Education","Prosperity"],                           description:"The most common and widely worn Rudraksha. Ruled by Jupiter. Brings overall wellbeing, health, and peace. Suitable for everyone. Purifies the wearer and calms the mind.",                                                                                                                keywords:["om","hrim","hreem","rim","namah","nama"]},
+  {mukhi:6,  label:"6 Mukhi",     mantra:"Om Hrim Hoom Namah",                                   hindi:"ॐ ह्रीं हूं नमः",                          deity:"Kartikeya (Skanda)",           planet:"Venus",       chakra:"Svadhishthana (Sacral)", benefits:["Willpower","Focus","Artistic abilities","Leadership","Wisdom"],                                 description:"Represents Kartikeya, son of Shiva. Gives willpower, focus, and strength. Excellent for artists, managers, and those in leadership roles.",                                                                                                                                               keywords:["om","hrim","hreem","rim","hoom","hum","namah","nama"]},
+  {mukhi:7,  label:"7 Mukhi",     mantra:"Om Hum Namah",                                         hindi:"ॐ हूं नमः",                                deity:"Mahalakshmi",                  planet:"Saturn",      chakra:"Manipura (Solar Plexus)", benefits:["Wealth","Removes poverty","Business success","Financial luck","Health"],                          description:"Represents Mahalakshmi. Extremely powerful for attracting wealth and removing financial obstacles. Favored by businesspeople and those facing Saturn's malefic effects.",                                                                                                                   keywords:["om","hum","hoom","home","namah","nama"]},
+  {mukhi:8,  label:"8 Mukhi",     mantra:"Om Hum Namah",                                         hindi:"ॐ हूं नमः",                                deity:"Ganesha",                      planet:"Rahu",        chakra:"Muladhara (Root)",     benefits:["Removes obstacles","Success","Intellect","Intuition","Protection"],                              description:"Represents Ganesha, remover of obstacles. Gives intelligence to overcome all hurdles. Neutralizes malefic effects of Rahu and protects from negative energies.",                                                                                                                          keywords:["om","hum","hoom","home","namah","nama"]},
+  {mukhi:9,  label:"9 Mukhi",     mantra:"Om Hrim Hum Namah",                                    hindi:"ॐ ह्रीं हूं नमः",                          deity:"Durga (Navadurga)",            planet:"Ketu",        chakra:"Muladhara (Root)",     benefits:["Fearlessness","Power","Dynamic energy","Removes Ketu doshas","Protection"],                     description:"Represents the nine forms of Goddess Durga. Infuses fearlessness and power. Excellent for neutralizing Ketu's malefic influence and protection from all fears.",                                                                                                                          keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"]},
+  {mukhi:10, label:"10 Mukhi",    mantra:"Om Hrim Namah",                                        hindi:"ॐ ह्रीं नमः",                              deity:"Lord Vishnu",                  planet:"All Planets", chakra:"Anahata (Heart)",      benefits:["All planets pacified","Legal victories","Protection","Peace","Success"],                          description:"Represents Lord Vishnu the preserver. Pacifies all nine planets simultaneously. Provides complete protection and ensures success in legal matters.",                                                                                                                                        keywords:["om","hrim","hreem","rim","namah","nama"]},
+  {mukhi:11, label:"11 Mukhi",    mantra:"Om Hrim Hum Namah",                                    hindi:"ॐ ह्रीं हूं नमः",                          deity:"Eleven Rudras / Hanuman",      planet:"All Planets", chakra:"Ajna (Third Eye)",     benefits:["Wisdom","Right decisions","Strength","Deep meditation","Adventure"],                             description:"Represents the eleven Rudras. Gives wisdom for right decisions. Blesses with Hanuman's strength and protection. Favored by meditators and travelers.",                                                                                                                                    keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"]},
+  {mukhi:12, label:"12 Mukhi",    mantra:"Om Krom Srom Rom Namah",                               hindi:"ॐ क्रों स्रों रों नमः",                    deity:"Surya (Sun God)",              planet:"Sun",         chakra:"Manipura (Solar Plexus)", benefits:["Confidence","Leadership","Administrative power","Eye health","Removes sun doshas"],             description:"Represents the twelve Adityas. Radiates solar energy. Bestows confidence and leadership. Excellent for politicians, executives, and those with eye problems.",                                                                                                                            keywords:["om","krom","srom","rom","namah","nama"]},
+  {mukhi:13, label:"13 Mukhi",    mantra:"Om Hrim Namah",                                        hindi:"ॐ ह्रीं नमः",                              deity:"Kamadeva / Indra",             planet:"Venus",       chakra:"Svadhishthana (Sacral)", benefits:["Fulfills desires","Charisma","Attraction","Material success","Spiritual growth"],               description:"Represents Kamadeva and Indra. Fulfills worldly desires and grants charm. The wearer becomes attractive and achieves success in all endeavors.",                                                                                                                                           keywords:["om","hrim","hreem","rim","namah","nama"]},
+  {mukhi:14, label:"14 Mukhi",    mantra:"Om Namah",                                             hindi:"ॐ नमः",                                    deity:"Deva Mani / Shiva Third Eye",  planet:"Saturn/Mars", chakra:"Ajna (Third Eye)",     benefits:["Intuition","Foresight","Third eye activation","Supreme protection","Consciousness"],              description:"Called Deva Mani. Opens the Ajna chakra. Sharpens intuition to a supernatural level and provides supreme protection. Second most divine after 1 Mukhi.",                                                                                                                                  keywords:["om","namah","nama","namo"]},
+  {mukhi:15, label:"15 Mukhi",    mantra:"Om Hrim Namah",                                        hindi:"ॐ ह्रीं नमः",                              deity:"Pashupatinath",                planet:"Mercury",     chakra:"Ajna (Third Eye)",     benefits:["Lateral thinking","Abstract intellect","Hidden knowledge","Business success","Healing"],         description:"Represents Pashupatinath. Enhances lateral and abstract thinking. Beneficial for healers, doctors, and those pursuing hidden or esoteric knowledge.",                                                                                                                                     keywords:["om","hrim","hreem","rim","namah","nama"]},
+  {mukhi:16, label:"16 Mukhi",    mantra:"Om Hrim Hum Namah",                                    hindi:"ॐ ह्रीं हूं नमः",                          deity:"Mahamrityunjaya Shiva",        planet:"Moon",        chakra:"Vishuddha (Throat)",   benefits:["Victory over death","Fear removal","Protection","Long life","Health"],                           description:"Represents Shiva's victory over death. Provides fearlessness and protection from untimely death. Amplifies the Mahamrityunjaya mantra effect.",                                                                                                                                           keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"]},
+  {mukhi:17, label:"17 Mukhi",    mantra:"Om Hrim Hum Hum Namah",                               hindi:"ॐ ह्रीं हूं हूं नमः",                      deity:"Vishwakarma / Katyayani",      planet:"Saturn",      chakra:"Manipura (Solar Plexus)", benefits:["Sudden wealth","Land & property","Manifestation","Material gains","Saturn relief"],             description:"Represents Vishwakarma and Katyayani. Attracts sudden wealth, land, and property. Very powerful for Saturn Sadesati. Helps manifest material desires rapidly.",                                                                                                                           keywords:["om","hrim","hreem","rim","hum","hoom","namah","nama"]},
+  {mukhi:18, label:"18 Mukhi",    mantra:"Om Hrim Hum Ekatva Rupe Hum Hrim Om",                 hindi:"ॐ ह्रीं हूं एकत्वरूपे हूं ह्रीं ॐ",       deity:"Bhumi Devi (Earth Goddess)",   planet:"Earth",       chakra:"Muladhara (Root)",     benefits:["Grounding","Real estate","Fertility","Mother health","Stability"],                               description:"Represents Bhumi Devi, the Earth goddess. Beneficial for pregnant women and maternal health. Brings stability and success in real estate.",                                                                                                                                                keywords:["om","hrim","hreem","hum","hoom","namah","nama"]},
+  {mukhi:19, label:"19 Mukhi",    mantra:"Om Namoh Bhagwate Vashu Devaya Namah",                 hindi:"ॐ नमः भगवते वासुदेवाय नमः",               deity:"Lord Vishnu (Narayana)",       planet:"Mercury",     chakra:"Anahata (Heart)",      benefits:["Unlimited wealth","All desires fulfilled","Business","Protection","Spiritual progress"],          description:"Represents Lord Vishnu in his complete form. Rarest bead for material prosperity. Fulfills all legitimate desires and provides Vishnu's complete protection.",                                                                                                                             keywords:["om","namoh","namo","bhagwate","vashu","devaya","namah","nama"]},
+  {mukhi:20, label:"20 Mukhi",    mantra:"Om Hrim Hrim Hum Hum Brahmane Namah",                 hindi:"ॐ ह्रीं ह्रीं हूं हूं ब्रह्मणे नमः",    deity:"Brahma (Trimurti)",            planet:"All Planets", chakra:"Sahasrara (Crown)",   benefits:["Creation power","All-round success","Wisdom","Divine protection","Moksha"],                      description:"Represents Brahma in his most expansive form. Extremely rare. Gives cosmic creative power. Provides all-round success and divine protection from all directions.",                                                                                                                        keywords:["om","hrim","hreem","hum","hoom","brahmane","namah","nama"]},
+  {mukhi:21, label:"21 Mukhi",    mantra:"Om Hreem Hoom Shivaya Namah",                         hindi:"ॐ ह्रीं हूं शिवाय नमः",                   deity:"Kubera / Shiva",               planet:"All Planets", chakra:"Sahasrara (Crown)",   benefits:["Supreme wealth","Power","Status","All planets pacified","Kubera blessings"],                     description:"King of Rudrakshas for wealth. Represents Kubera, lord of wealth. Pacifies all planets and opens all doors of prosperity. Historically worn by maharajas.",                                                                                                                               keywords:["om","hreem","hrim","hoom","hum","shivaya","namah","nama"]},
+  {mukhi:22, label:"22 Mukhi",    mantra:"Om Hreem Hum Namah",                                  hindi:"ॐ ह्रीं हूं नमः",                          deity:"Brahma (Subtle form)",         planet:"All Planets", chakra:"Sahasrara (Crown)",   benefits:["Deep meditation","Cosmic awareness","Removes deep ego","Spiritual clarity","Liberation"],        description:"One of the rarest Rudrakshas. Connects with Brahma's subtle creative intelligence. Removes deep-rooted ego. Ideal for advanced spiritual seekers.",                                                                                                                                       keywords:["om","hreem","hrim","hum","hoom","namah","nama"]},
+  {mukhi:23, label:"23 Mukhi",    mantra:"Om Namo Bhagwatey Vishnu Devaya Namah",               hindi:"ॐ नमो भगवते विष्णु देवाय नमः",            deity:"Shiva-Vishnu combined",        planet:"All Planets", chakra:"Anahata (Heart)",      benefits:["Ultimate success","Harmony","Fame","Longevity","Combined divine grace"],                          description:"Combining energies of both Shiva and Vishnu. Brings ultimate success, harmony, and the combined divine grace of the two supreme deities.",                                                                                                                                                keywords:["om","namo","bhagwatey","vishnu","devaya","namah","nama"]},
+  {mukhi:24, label:"24 Mukhi",    mantra:"Om Krom Shrom Rom Namah",                             hindi:"ॐ क्रों श्रों रों नमः",                    deity:"Brahma (Ultimate Creator)",    planet:"Sun",         chakra:"Sahasrara (Crown)",   benefits:["Divine authority","Cosmic wisdom","Supreme protection","All success","Manifestation"],           description:"Represents Brahma's ultimate creative authority. Gives cosmic wisdom and supreme protection. Very few authentic beads exist worldwide.",                                                                                                                                                    keywords:["om","krom","shrom","rom","namah","nama"]},
+  {mukhi:25, label:"25 Mukhi",    mantra:"Om Hreem Shreem Vam Tripura Sundari Devyai Namah",    hindi:"ॐ ह्रीं श्रीं वं त्रिपुरसुन्दरी देव्यै नमः", deity:"Tripura Sundari (Devi)",   planet:"All Planets", chakra:"Sahasrara (Crown)",   benefits:["Divine feminine power","Beauty","Supreme Shakti","Cosmic wisdom","Moksha"],                     description:"Represents Tripura Sundari, the most beautiful form of Goddess. Awakens divine feminine energy. Said to grant liberation (Moksha) to the wearer.",                                                                                                                                       keywords:["om","hreem","hrim","shreem","vam","tripura","sundari","devyai","namah","nama"]},
+  {mukhi:"G",label:"Gaurishankar",mantra:"Om Gauri Shankaray Namaha",                           hindi:"ॐ गौरी शंकराय नमः",                        deity:"Shiva & Parvati (Union)",      planet:"Moon",        chakra:"Anahata (Heart)",      benefits:["Marital harmony","Love","Family peace","Soul unity","Spiritual partnership"],                    description:"Two naturally joined Rudrakshas representing divine union of Shiva and Parvati. The most powerful bead for marital harmony and love.",                                                                                                                                                     keywords:["om","gauri","gowri","shankaray","shankar","namaha","namah","nama"]}
 ];
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════
+// DATA — CHAKRAS
+// ══════════════════════════════════════
+const chakraData = [
+  {
+    name:"Muladhara", english:"Root Chakra", symbol:"🔴", color:"#c04040",
+    location:"Base of spine", element:"Earth", seedMantra:"LAM",
+    qualities:"Grounding, security, survival, material stability",
+    rudrakshas:["8 Mukhi","9 Mukhi","18 Mukhi"],
+    mantras:["Om Hum Namah","Om Hrim Hum Namah"],
+    description:"The foundation of the energy body. When balanced, you feel safe, grounded, and secure. The 8 and 9 Mukhi Rudrakshas directly energize this chakra, removing fear and instilling courage."
+  },
+  {
+    name:"Svadhishthana", english:"Sacral Chakra", symbol:"🟠", color:"#e08030",
+    location:"Lower abdomen", element:"Water", seedMantra:"VAM",
+    qualities:"Creativity, desire, relationships, emotions, sexuality",
+    rudrakshas:["2 Mukhi","6 Mukhi","13 Mukhi"],
+    mantras:["Om Namah","Om Hrim Hoom Namah"],
+    description:"Governs creativity and emotional flow. The 2 Mukhi (Shiva-Shakti union) directly harmonizes this chakra. The 6 Mukhi stimulates creative energy and the 13 Mukhi activates magnetism."
+  },
+  {
+    name:"Manipura", english:"Solar Plexus Chakra", symbol:"🟡", color:"#c0a020",
+    location:"Navel area", element:"Fire", seedMantra:"RAM",
+    qualities:"Willpower, confidence, power, transformation, digestion",
+    rudrakshas:["3 Mukhi","7 Mukhi","12 Mukhi","17 Mukhi"],
+    mantras:["Om Klim Namah","Om Hum Namah","Om Krom Srom Rom Namah"],
+    description:"The seat of personal power. The 3 Mukhi (Agni/fire) directly activates this chakra, burning past karma. The 12 Mukhi (Surya) radiates solar energy for confidence and leadership."
+  },
+  {
+    name:"Anahata", english:"Heart Chakra", symbol:"💚", color:"#40a060",
+    location:"Center of chest", element:"Air", seedMantra:"YAM",
+    qualities:"Love, compassion, healing, devotion, emotional balance",
+    rudrakshas:["10 Mukhi","19 Mukhi","23 Mukhi","Gaurishankar"],
+    mantras:["Om Hrim Namah","Om Gauri Shankaray Namaha"],
+    description:"The bridge between earthly and divine energies. Gaurishankar Rudraksha (Shiva-Parvati) is the most powerful for the heart chakra. The 10 Mukhi (Vishnu) radiates unconditional love and peace."
+  },
+  {
+    name:"Vishuddha", english:"Throat Chakra", symbol:"🔵", color:"#4080c0",
+    location:"Throat", element:"Space/Ether", seedMantra:"HAM",
+    qualities:"Communication, truth, self-expression, creativity, listening",
+    rudrakshas:["4 Mukhi","16 Mukhi"],
+    mantras:["Om Hrim Namah","Om Hrim Hum Namah"],
+    description:"Governs communication and truth. The 4 Mukhi (Brahma) enhances speech and expression. The 16 Mukhi (Mahamrityunjaya) purifies the throat and voice through the victory mantra of Shiva."
+  },
+  {
+    name:"Ajna", english:"Third Eye Chakra", symbol:"🟣", color:"#8050c0",
+    location:"Between eyebrows", element:"Light", seedMantra:"OM",
+    qualities:"Intuition, wisdom, clarity, foresight, inner vision",
+    rudrakshas:["5 Mukhi","11 Mukhi","14 Mukhi","15 Mukhi"],
+    mantras:["Om Hrim Namah","Om Hrim Hum Namah","Om Namah"],
+    description:"The seat of intuition and higher wisdom. The 14 Mukhi (Deva Mani) is the most powerful for Ajna activation. The 5 Mukhi is universally balancing and the 11 Mukhi enhances meditation depth."
+  },
+  {
+    name:"Sahasrara", english:"Crown Chakra", symbol:"⚪", color:"#c0a0e0",
+    location:"Top of head", element:"Consciousness", seedMantra:"AH or silence",
+    qualities:"Divine connection, enlightenment, unity, liberation, cosmic consciousness",
+    rudrakshas:["1 Mukhi","20 Mukhi","21 Mukhi","22 Mukhi","24 Mukhi","25 Mukhi"],
+    mantras:["Om Hrim Namah","Om Hreem Hoom Shivaya Namah"],
+    description:"The gateway to divine consciousness. The 1 Mukhi Rudraksha is the supreme activator of this chakra — it is Shiva himself. The 21 Mukhi (Kubera-Shiva) and 25 Mukhi (Tripura Sundari) bring cosmic awareness and liberation."
+  }
+];
+
+// ══════════════════════════════════════
 // STATE
-// ════════════════════════════════════════
-let count = 0, isRunning = false, recognition = null, audioCtx = null;
-let sensitivity = 2, cooldown = false, detectionMode = 'namah';
-let currentInfoIdx = 0, filteredInfo = [...rudrakshaData];
-let stats = loadStats();
-const CIRCUMFERENCE = 2 * Math.PI * 72;
+// ══════════════════════════════════════
+let count=0, isRunning=false, recognition=null, audioCtx=null;
+let sensitivity=2, cooldown=false;
+let isPremium = localStorage.getItem('rudramala_premium')==='true';
+let currentRudraIdx=0, filteredRudra=[...rudrakshaData];
+let stats=loadStats();
+const CIRCUMFERENCE=2*Math.PI*68;
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════
 // INIT
-// ════════════════════════════════════════
-const mantraSelect = document.getElementById('mantra-select');
-rudrakshaData.forEach((r, i) => {
-  const opt = document.createElement('option');
-  opt.value = i;
-  opt.textContent = r.label + ' — ' + r.mantra;
-  mantraSelect.appendChild(opt);
+// ══════════════════════════════════════
+const mantraSelect=document.getElementById('mantra-select');
+rudrakshaData.forEach((r,i)=>{
+  const o=document.createElement('option');
+  o.value=i; o.textContent=r.label+' — '+r.mantra;
+  mantraSelect.appendChild(o);
 });
-document.getElementById('ring').style.strokeDasharray = CIRCUMFERENCE;
-document.getElementById('ring').style.strokeDashoffset = CIRCUMFERENCE;
+document.getElementById('ring').style.strokeDasharray=CIRCUMFERENCE;
+document.getElementById('ring').style.strokeDashoffset=CIRCUMFERENCE;
 onMantraChange();
+updatePremiumUI();
+renderChakras();
+renderRudra();
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════
 // TABS
-// ════════════════════════════════════════
-function showTab(name, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
+// ══════════════════════════════════════
+function showTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
   btn.classList.add('active');
-  if (name === 'info') renderInfo();
-  if (name === 'stats') renderStats();
+  if(name==='rudraksha') renderRudra();
+  if(name==='stats') renderStats();
 }
 
-// ════════════════════════════════════════
-// MANTRA
-// ════════════════════════════════════════
-function onMantraChange() {
-  const r = getCurrentRudraksha();
-  document.getElementById('mantra-text').textContent = r.mantra;
-  document.getElementById('mantra-hindi').textContent = r.hindi;
+// ══════════════════════════════════════
+// MANTRA & FIELDS
+// ══════════════════════════════════════
+function onMantraChange(){
+  const r=getCurrentRudraksha();
+  document.getElementById('mantra-text').textContent=r.mantra;
+  document.getElementById('mantra-hindi').textContent=r.hindi;
 }
-function getCurrentRudraksha() { return rudrakshaData[parseInt(mantraSelect.value)]; }
+function getCurrentRudraksha(){ return rudrakshaData[parseInt(mantraSelect.value)||0]; }
 
-function setMode(mode) {
-  detectionMode = mode;
-  document.getElementById('mode-namah').classList.toggle('active', mode === 'namah');
-  document.getElementById('mode-full').classList.toggle('active', mode === 'full');
-}
-
-function onSensChange() {
-  sensitivity = parseInt(document.getElementById('sensitivity').value);
-  document.getElementById('sens-val').textContent = {1:"Strict",2:"Medium",3:"Loose"}[sensitivity];
-}
-
-function onTargetChange() {
-  const goal = parseInt(document.getElementById('target-select').value);
-  document.getElementById('goal-label').textContent = 'of ' + goal;
-  updateRing(count, goal);
+function onTargetChange(){
+  const val=parseInt(document.getElementById('target-select').value);
+  if(val>11 && !isPremium){
+    document.getElementById('target-select').value=11;
+    openPremium(); return;
+  }
+  document.getElementById('goal-label').textContent='of '+val;
+  updateRing(count,val);
 }
 
-// ════════════════════════════════════════
-// SPEECH RECOGNITION
-// ════════════════════════════════════════
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SR) {
-  recognition = new SR();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = 'en-US';
-  recognition.onresult = function(e) {
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      const text = e.results[i][0].transcript.toLowerCase().trim();
-      document.getElementById('heard-box').textContent = '"' + text + '"';
-      if (detectionMode === 'namah') checkNamahOnly(text, e.results[i].isFinal);
-      else checkFullMantra(text, e.results[i].isFinal);
+function onSensChange(){
+  sensitivity=parseInt(document.getElementById('sensitivity').value);
+  document.getElementById('sens-val').textContent={1:"Strict",2:"Medium",3:"Loose"}[sensitivity];
+}
+
+// ══════════════════════════════════════
+// SPEECH — NAMAH ONLY DETECTION
+// ══════════════════════════════════════
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){
+  recognition=new SR();
+  recognition.continuous=true; recognition.interimResults=true; recognition.lang='en-US';
+  recognition.onresult=function(e){
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const text=e.results[i][0].transcript.toLowerCase().trim();
+      document.getElementById('heard-box').textContent='"'+text+'"';
+      checkNamahOnly(text,e.results[i].isFinal);
     }
   };
-  recognition.onend = function() {
-    if (isRunning) setTimeout(() => { try { recognition.start(); } catch(e2){} }, 300);
-  };
-  recognition.onerror = function(e) {
-    if (e.error === 'no-speech') return;
-    setStatus("Mic error: " + e.error, "error");
-  };
-} else {
-  setStatus("Voice not supported — use Chrome on Android or Desktop", "error");
-  document.getElementById('start-btn').disabled = true;
+  recognition.onend=function(){ if(isRunning) setTimeout(()=>{try{recognition.start();}catch(e2){}},300); };
+  recognition.onerror=function(e){ if(e.error==='no-speech') return; setStatus("Mic error: "+e.error,"error"); };
+}else{
+  setStatus("Voice not supported — use Chrome on Android or Desktop","error");
+  document.getElementById('start-btn').disabled=true;
 }
 
-// ════════════════════════════════════════
-// NAMAH-ONLY DETECTION
-// Your insight: all mantras end in "Namah",
-// so detecting it = one complete chant.
-// We also require an Om/seed sound first to
-// prevent false triggers from normal speech.
-// ════════════════════════════════════════
-const NAMAH_RE = /\bnam[ao]h?[ao]?\b|\bnam[ao]\b|\bnamas\b/;
-const OM_RE    = /\b(oh?m|aum|home|hom|hri+m|hree+m|hreem|rim|ream|green|cream|hu+m|hoo+m|whom|klim|kleem|krom|srom|rom|gauri|gowri|shankar|bhagwate|vishnu|devaya|tripura|sundari)\b/;
+// The key insight you discovered:
+// All Rudraksha mantras end in "Namah/Namaha"
+// Detect that + an Om/seed sound = one complete chant
+const NAMAH_RE=/\bnam[ao]h?[ao]?\b|\bnam[ao]\b|\bnamas\b/;
+const OM_RE=/\b(oh?m|aum|home|hom|hri+m|hree+m|hreem|rim|ream|green|cream|hu+m|hoo+m|whom|klim|kleem|krom|srom|rom|gauri|gowri|shankar|bhagwate|vishnu|devaya|tripura|sundari)\b/;
+let recentWin='', winTimer=null;
 
-let recentWindow = '', windowTimer = null;
-
-function checkNamahOnly(text, isFinal) {
-  if (cooldown) return;
-  recentWindow = (recentWindow + ' ' + text).slice(-150);
-  clearTimeout(windowTimer);
-  windowTimer = setTimeout(() => { recentWindow = ''; }, 5000);
-
-  const hasNameh = NAMAH_RE.test(recentWindow);
-  if (!hasNameh) return;
-
-  const hasOm = OM_RE.test(recentWindow);
-  // Strict & Medium: require an Om/seed sound. Loose: namah alone counts.
-  if (sensitivity < 3 && !hasOm) return;
-
-  if (isFinal) {
-    triggerCount("Namah detected");
-    recentWindow = '';
-  }
+function checkNamahOnly(text,isFinal){
+  if(cooldown) return;
+  recentWin=(recentWin+' '+text).slice(-150);
+  clearTimeout(winTimer);
+  winTimer=setTimeout(()=>{recentWin='';},5000);
+  const hasNameh=NAMAH_RE.test(recentWin);
+  if(!hasNameh) return;
+  const hasOm=OM_RE.test(recentWin);
+  if(sensitivity<3 && !hasOm) return;
+  if(isFinal){ triggerCount("Namah detected"); recentWin=''; }
 }
 
-// ════════════════════════════════════════
-// FULL MANTRA DETECTION
-// ════════════════════════════════════════
-function normalize(t) {
-  return t
-    .replace(/\boh?m\b/g,"om").replace(/\baum\b/g,"om")
-    .replace(/\bh?ree+m\b/g,"hrim").replace(/\bh?rim\b/g,"hrim").replace(/\bhrum\b/g,"hrim")
-    .replace(/\bgreen\b/g,"hrim").replace(/\bdream\b/g,"hrim").replace(/\bcream\b/g,"hrim").replace(/\bream\b/g,"hrim")
-    .replace(/\bhoo+m\b/g,"hum").replace(/\bwhom\b/g,"hum").replace(/\bwomb\b/g,"hum").replace(/\bhome\b/g,"hum").replace(/\bham\b/g,"hum")
-    .replace(/\bnam[ao]h?\b/g,"namah").replace(/\bnamo\b/g,"namah")
-    .replace(/\bkleem\b/g,"klim").replace(/\bshrom\b/g,"srom");
-}
-
-function checkFullMantra(rawText, isFinal) {
-  if (cooldown || !isFinal) return;
-  const r = getCurrentRudraksha();
-  const n = normalize(rawText);
-  const matched = r.keywords.filter(k => n.includes(k));
-  const threshold = sensitivity === 1 ? Math.ceil(r.keywords.length * 0.6)
-                  : sensitivity === 2 ? Math.ceil(r.keywords.length * 0.4) : 2;
-  if (matched.length >= threshold) triggerCount("Full match: " + matched.join(', '));
-}
-
-// ════════════════════════════════════════
+// ══════════════════════════════════════
 // COUNT & UI
-// ════════════════════════════════════════
-function triggerCount(reason) {
-  if (cooldown) return;
-  cooldown = true;
-  setTimeout(() => cooldown = false, 900);
-
+// ══════════════════════════════════════
+function triggerCount(reason){
+  if(cooldown) return;
+  cooldown=true; setTimeout(()=>cooldown=false,900);
   count++;
-  const goal = parseInt(document.getElementById('target-select').value);
-  document.getElementById('counter').textContent = count;
-  pulseCounter();
-  updateRing(count, goal);
-  playBeep(count === goal);
-  vibrate(count === goal ? 400 : 40);
-
-  if (count >= goal) {
-    saveSession(goal);
-    stopApp();
-    setStatus("Completed! " + goal + " mantras. Jai Shiva!", "done");
-    document.getElementById('heard-box').textContent = '';
+  const goal=parseInt(document.getElementById('target-select').value);
+  document.getElementById('counter').textContent=count;
+  document.getElementById('lb-you').textContent=count;
+  pulseCounter(); updateRing(count,goal);
+  playBeep(count===goal); vibrate(count===goal?400:40);
+  if(count>=goal){
+    saveSession(goal); stopApp();
+    setStatus("Completed! "+goal+" mantras. Jai Shiva! 🙏","done");
+    document.getElementById('heard-box').textContent='';
   } else {
-    setStatus(reason, "matched");
+    setStatus(reason,"matched");
   }
 }
 
-function updateRing(current, goal) {
-  const pct = Math.min(current / goal, 1);
-  const ring = document.getElementById('ring');
-  ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
-  ring.style.stroke = pct > 0.9 ? '#40c080' : pct > 0.6 ? '#c0a040' : '#c9a84c';
+function updateRing(c,g){
+  const p=Math.min(c/g,1), ring=document.getElementById('ring');
+  ring.style.strokeDashoffset=CIRCUMFERENCE*(1-p);
+  ring.style.stroke=p>.9?'#40c080':p>.6?'#c0a040':'#c9a84c';
 }
+function pulseCounter(){ const el=document.getElementById('counter'); el.classList.add('pulse'); setTimeout(()=>el.classList.remove('pulse'),160); }
 
-function pulseCounter() {
-  const el = document.getElementById('counter');
-  el.classList.add('pulse');
-  setTimeout(() => el.classList.remove('pulse'), 160);
-}
-
-function playBeep(isComplete) {
-  if (!audioCtx) return;
-  try {
-    if (isComplete) {
-      [523,659,784,1046].forEach((freq, i) => {
-        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.connect(g); g.connect(audioCtx.destination);
-        o.frequency.value = freq; o.type = 'sine';
-        g.gain.setValueAtTime(0.18, audioCtx.currentTime + i*0.1);
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + i*0.1 + 1.0);
-        o.start(audioCtx.currentTime + i*0.1);
-        o.stop(audioCtx.currentTime + i*0.1 + 1.0);
+function playBeep(isComplete){
+  if(!audioCtx) return;
+  try{
+    if(isComplete){
+      [523,659,784,1046].forEach((f,i)=>{
+        const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+        o.connect(g);g.connect(audioCtx.destination);
+        o.frequency.value=f;o.type='sine';
+        g.gain.setValueAtTime(.18,audioCtx.currentTime+i*.1);
+        g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+i*.1+1);
+        o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+1);
       });
-    } else {
-      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-      o.connect(g); g.connect(audioCtx.destination);
-      o.type = 'sine'; o.frequency.value = 720;
-      g.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
-      o.start(); o.stop(audioCtx.currentTime + 0.2);
+    }else{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.connect(g);g.connect(audioCtx.destination);
+      o.type='sine';o.frequency.value=720;
+      g.gain.setValueAtTime(.15,audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.2);
+      o.start();o.stop(audioCtx.currentTime+.2);
     }
-  } catch(e) {}
+  }catch(e){}
+}
+function vibrate(d){ if(navigator.vibrate) navigator.vibrate(d); }
+
+function setStatus(msg,type){
+  const box=document.getElementById('status-box'),dot=box.querySelector('.status-dot');
+  box.className=type||'';
+  dot.className='status-dot'+(type==='listening'?'':' static');
+  document.getElementById('status-text').textContent=msg;
 }
 
-function vibrate(d) { if (navigator.vibrate) navigator.vibrate(d); }
-
-function setStatus(msg, type) {
-  const box = document.getElementById('status-box');
-  const dot = box.querySelector('.status-dot');
-  box.className = type || '';
-  dot.className = 'status-dot' + (type === 'listening' ? '' : ' static');
-  document.getElementById('status-text').textContent = msg;
+// ══════════════════════════════════════
+// BUTTONS
+// ══════════════════════════════════════
+async function toggleStart(){
+  if(!isRunning){
+    try{
+      audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==='suspended') await audioCtx.resume();
+      await navigator.mediaDevices.getUserMedia({audio:true});
+      isRunning=true;
+      if(recognition) recognition.start();
+      const btn=document.getElementById('start-btn');
+      btn.textContent='■ STOP'; btn.classList.add('stop');
+      document.getElementById('screen-warning').classList.add('show');
+      setStatus("Listening — chant your mantra…","listening");
+    }catch(e){ setStatus("Microphone permission denied","error"); }
+  }else{ stopApp(); setStatus("Stopped",""); }
 }
 
-// ════════════════════════════════════════
-// BUTTON HANDLERS
-// ════════════════════════════════════════
-async function toggleStart() {
-  if (!isRunning) {
-    try {
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') await audioCtx.resume();
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      isRunning = true;
-      if (recognition) recognition.start();
-      const btn = document.getElementById('start-btn');
-      btn.textContent = 'STOP';
-      btn.classList.add('stop');
-      setStatus("Listening — chant your mantra…", "listening");
-    } catch(e) {
-      setStatus("Microphone permission denied", "error");
-    }
-  } else {
-    stopApp();
-    setStatus("Stopped", "");
-  }
+function doReset(){
+  stopApp(); count=0; recentWin='';
+  document.getElementById('counter').textContent='0';
+  const ring=document.getElementById('ring');
+  ring.style.strokeDashoffset=CIRCUMFERENCE; ring.style.stroke='#c9a84c';
+  document.getElementById('heard-box').textContent='';
+  document.getElementById('screen-warning').classList.remove('show');
+  setStatus("Reset — ready to begin","");
 }
 
-function doReset() {
-  stopApp();
-  count = 0; recentWindow = '';
-  document.getElementById('counter').textContent = '0';
-  const ring = document.getElementById('ring');
-  ring.style.strokeDashoffset = CIRCUMFERENCE;
-  ring.style.stroke = '#c9a84c';
-  document.getElementById('heard-box').textContent = '';
-  setStatus("Reset — ready to begin", "");
+function stopApp(){
+  isRunning=false;
+  if(recognition) try{recognition.stop();}catch(e){}
+  const btn=document.getElementById('start-btn');
+  btn.textContent='▶ START LISTENING'; btn.classList.remove('stop');
 }
 
-function stopApp() {
-  isRunning = false;
-  if (recognition) try { recognition.stop(); } catch(e) {}
-  const btn = document.getElementById('start-btn');
-  btn.textContent = 'START LISTENING';
-  btn.classList.remove('stop');
-}
-
-// ════════════════════════════════════════
-// INFO TAB
-// ════════════════════════════════════════
-function renderInfo() {
-  if (!filteredInfo.length) {
-    document.getElementById('info-content').innerHTML = '<div class="info-card" style="text-align:center;color:var(--text-dim);padding:40px">No results found</div>';
-    return;
-  }
-  const r = filteredInfo[currentInfoIdx];
-  document.getElementById('info-content').innerHTML = `
+// ══════════════════════════════════════
+// RUDRAKSHA INFO
+// ══════════════════════════════════════
+function renderRudra(){
+  if(!filteredRudra.length){ document.getElementById('rudra-content').innerHTML='<div class="info-card" style="text-align:center;color:var(--text-dim);padding:40px">No results found</div>'; return; }
+  const r=filteredRudra[currentRudraIdx];
+  document.getElementById('rudra-content').innerHTML=`
     <div class="info-card">
-      <div class="mukhi-badge">
-        <span class="num">${r.mukhi}</span>
-        <span class="label">MUKHI</span>
-      </div>
-      <div class="info-mantra-line">${r.mantra}</div>
-      <div class="info-deity">Deity: ${r.deity} &nbsp;&middot;&nbsp; Planet: ${r.planet}</div>
+      <div class="mukhi-badge"><span class="num">${r.mukhi}</span><span class="mlabel">MUKHI</span></div>
+      <div style="font-size:15px;color:var(--gold);font-family:'Cinzel',serif;margin-bottom:3px">${r.mantra}</div>
+      <div style="font-size:14px;color:var(--text-dim);font-style:italic;margin-bottom:12px">Deity: ${r.deity} · Planet: ${r.planet}</div>
+      <div class="info-section-label">Chakra</div>
+      <div class="info-text" style="color:#9060c0">🌀 ${r.chakra}</div>
       <div class="info-section-label">Sanskrit Mantra</div>
-      <div class="info-text" style="color:var(--gold);font-size:16px">${r.hindi}</div>
-      <div class="info-section-label">About this Rudraksha</div>
+      <div class="info-text" style="color:var(--gold);font-size:15px">${r.hindi}</div>
+      <div class="info-section-label">About</div>
       <div class="info-text">${r.description}</div>
       <div class="info-section-label">Key Benefits</div>
-      <div class="benefit-tags">${r.benefits.map(b => `<span class="tag">${b}</span>`).join('')}</div>
+      <div class="benefit-tags">${r.benefits.map(b=>`<span class="tag">${b}</span>`).join('')}</div>
       <div style="margin-top:14px">
         <button class="btn" onclick="selectAndCounter(${rudrakshaData.indexOf(r)})"
           style="background:linear-gradient(135deg,var(--gold),var(--amber));color:#1a0e00;margin:0;padding:10px;font-size:11px">
-          USE THIS MANTRA IN COUNTER
+          ▶ USE THIS MANTRA IN COUNTER
         </button>
       </div>
     </div>
-    <div style="text-align:center;font-size:11px;color:var(--text-dim);margin-top:4px">
-      ${currentInfoIdx+1} of ${filteredInfo.length}
-    </div>
-  `;
+    <div style="text-align:center;font-size:11px;color:var(--text-dim);margin-top:4px">${currentRudraIdx+1} of ${filteredRudra.length}</div>`;
 }
-
-function infoStep(dir) {
-  currentInfoIdx = (currentInfoIdx + dir + filteredInfo.length) % filteredInfo.length;
-  renderInfo();
+function rudraStep(d){ currentRudraIdx=(currentRudraIdx+d+filteredRudra.length)%filteredRudra.length; renderRudra(); }
+function filterRudra(){
+  const q=document.getElementById('rudra-search').value.toLowerCase();
+  filteredRudra=rudrakshaData.filter(r=>r.label.toLowerCase().includes(q)||r.deity.toLowerCase().includes(q)||r.mantra.toLowerCase().includes(q)||r.chakra.toLowerCase().includes(q)||r.benefits.some(b=>b.toLowerCase().includes(q)));
+  currentRudraIdx=0; renderRudra();
 }
-
-function filterInfo() {
-  const q = document.getElementById('info-search').value.toLowerCase();
-  filteredInfo = rudrakshaData.filter(r =>
-    r.label.toLowerCase().includes(q) || r.deity.toLowerCase().includes(q) ||
-    r.mantra.toLowerCase().includes(q) || r.benefits.some(b => b.toLowerCase().includes(q))
-  );
-  currentInfoIdx = 0;
-  renderInfo();
-}
-
-function selectAndCounter(idx) {
-  mantraSelect.value = idx;
-  onMantraChange();
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+function selectAndCounter(idx){
+  mantraSelect.value=idx; onMantraChange();
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-counter').classList.add('active');
-  document.querySelector('.tab-btn').classList.add('active');
+  document.getElementById('nav-counter').classList.add('active');
 }
 
-// ════════════════════════════════════════
+// ══════════════════════════════════════
+// CHAKRAS
+// ══════════════════════════════════════
+function renderChakras(){
+  const list=document.getElementById('chakra-list');
+  list.innerHTML=chakraData.map(c=>`
+    <div class="chakra-card" style="--chakra-color:${c.color};background:linear-gradient(135deg,rgba(0,0,0,.6),rgba(0,0,0,.3));">
+      <div class="chakra-header">
+        <div class="chakra-symbol">${c.symbol}</div>
+        <div>
+          <div class="chakra-title" style="color:${c.color}">${c.name}</div>
+          <div class="chakra-sub">${c.english} · ${c.location}</div>
+        </div>
+      </div>
+      <div class="chakra-mantra">
+        <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:3px">SEED MANTRA</div>
+        <div class="chakra-mantra-text">${c.seedMantra} · Element: ${c.element}</div>
+      </div>
+      <div class="info-text" style="margin-bottom:10px">${c.description}</div>
+      <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px">RUDRAKSHAS FOR THIS CHAKRA</div>
+      <div class="chakra-rudrakshas">
+        ${c.rudrakshas.map(r=>`<span class="chakra-r-tag" style="color:${c.color};border-color:${c.color}40">📿 ${r}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════
 // STATS
-// ════════════════════════════════════════
-function loadStats() {
-  try { return JSON.parse(localStorage.getItem('mantra_stats') || '{"total":0,"sessions":[],"malas":0}'); }
-  catch(e) { return { total:0, sessions:[], malas:0 }; }
+// ══════════════════════════════════════
+function loadStats(){
+  try{ return JSON.parse(localStorage.getItem('rudramala_stats')||'{"total":0,"sessions":[],"malas":0,"streak":0,"lastDate":""}'); }
+  catch(e){ return{total:0,sessions:[],malas:0,streak:0,lastDate:""}; }
+}
+function saveSession(goal){
+  const r=getCurrentRudraksha();
+  const today=new Date().toDateString();
+  stats.total+=goal;
+  if(goal>=108) stats.malas++;
+  // Streak
+  if(stats.lastDate===new Date(Date.now()-86400000).toDateString()) stats.streak++;
+  else if(stats.lastDate!==today) stats.streak=1;
+  stats.lastDate=today;
+  stats.sessions.unshift({mantra:r.label+' — '+r.mantra,count:goal,date:new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})});
+  stats.sessions=stats.sessions.slice(0,20);
+  localStorage.setItem('rudramala_stats',JSON.stringify(stats));
+}
+function renderStats(){
+  document.getElementById('stat-total').textContent=stats.total.toLocaleString();
+  document.getElementById('stat-sessions').textContent=stats.sessions.length;
+  document.getElementById('stat-malas').textContent=stats.malas;
+  document.getElementById('stat-streak').textContent=stats.streak;
+  document.getElementById('last-chant-label').textContent=stats.lastDate?'Last chant: '+stats.lastDate:'No session yet';
+  const log=document.getElementById('session-log');
+  log.innerHTML=stats.sessions.length?stats.sessions.map(s=>`<div style="border-bottom:1px solid var(--border);padding:6px 0"><span style="color:var(--gold)">${s.count}&times;</span> ${s.mantra}<span style="float:right;font-size:11px;color:var(--text-dim)">${s.date}</span></div>`).join(''):'<span style="font-style:italic">No sessions yet. Start chanting! 🙏</span>';
+}
+function clearStats(){
+  if(confirm('Clear all stats?')){ stats={total:0,sessions:[],malas:0,streak:0,lastDate:""}; localStorage.setItem('rudramala_stats',JSON.stringify(stats)); renderStats(); }
 }
 
-function saveSession(goal) {
-  const r = getCurrentRudraksha();
-  stats.total += goal;
-  if (goal >= 108) stats.malas++;
-  stats.sessions.unshift({ mantra: r.label + ' — ' + r.mantra, count: goal, date: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) });
-  stats.sessions = stats.sessions.slice(0, 20);
-  localStorage.setItem('mantra_stats', JSON.stringify(stats));
+// ══════════════════════════════════════
+// PREMIUM
+// ══════════════════════════════════════
+function openPremium(){ document.getElementById('premium-modal').classList.add('show'); }
+function closePremium(){ document.getElementById('premium-modal').classList.remove('show'); }
+function selectPlan(el){ document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); }
+function activatePremium(){
+  // In real app: connect to Razorpay / Google Play Billing
+  isPremium=true;
+  localStorage.setItem('rudramala_premium','true');
+  updatePremiumUI();
+  closePremium();
+  alert('Welcome to Premium! All features unlocked. 🙏\n\nNote: In the real app, this connects to Razorpay payment gateway.');
+}
+function updatePremiumUI(){
+  const badge=document.getElementById('premium-badge-btn');
+  if(isPremium){ badge.textContent='✦ PREMIUM'; badge.classList.add('active'); }
 }
 
-function renderStats() {
-  document.getElementById('stat-total').textContent = stats.total.toLocaleString();
-  document.getElementById('stat-sessions').textContent = stats.sessions.length;
-  document.getElementById('stat-malas').textContent = stats.malas;
-  const log = document.getElementById('session-log');
-  if (!stats.sessions.length) {
-    log.innerHTML = '<span style="color:var(--text-dim);font-style:italic">No sessions yet. Start chanting!</span>';
-  } else {
-    log.innerHTML = stats.sessions.map(s =>
-      `<div style="border-bottom:1px solid var(--border);padding:6px 0">
-        <span style="color:var(--gold)">${s.count}&times;</span> ${s.mantra}
-        <span style="float:right;font-size:11px;color:var(--text-dim)">${s.date}</span>
-      </div>`
-    ).join('');
+// ══════════════════════════════════════
+// SHARE / SOCIAL
+// ══════════════════════════════════════
+function shareApp(){
+  if(navigator.share){
+    navigator.share({title:'RudraMala — Mantra Counter',text:'I use RudraMala to count my Rudraksha mantras. Try it!',url:window.location.href});
+  }else{
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copied to clipboard! Share it with your friends.');
   }
 }
+function notifyMe(){ alert('Thank you! We will notify you when Friends features go live.\n\nIn the real app, this captures your email via a form.'); }
 
-function clearStats() {
-  if (confirm('Clear all stats? This cannot be undone.')) {
-    stats = { total:0, sessions:[], malas:0 };
-    localStorage.setItem('mantra_stats', JSON.stringify(stats));
-    renderStats();
-  }
-}
-
-renderInfo();
-window.onerror = function(msg) { setStatus("Error: " + msg, "error"); };
+window.onerror=function(msg){ setStatus("Error: "+msg,"error"); };
 </script>
 </body>
 </html>
